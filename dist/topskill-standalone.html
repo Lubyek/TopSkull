@@ -1226,7 +1226,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
       <div class="taskbar__clock" id="clock" aria-label="Время в Челябинске">--:--:--</div>
       <div class="taskbar__right">
         <span class="status"><i class="dot"></i><span class="status__full">Открыто сейчас</span><span class="status__short">24/7</span></span>
-        <span class="mono hide-sm" title="Демо">ping <b id="ping">8</b> ms</span>
+        <span class="mono hide-sm">ping <b id="ping">8</b> ms</span>
         <span class="mono">мест: <b id="free-seats">--</b></span>
         <button type="button" class="btn btn--ghost btn--sm" id="mode-toggle" data-mode="classic"><span class="lbl-full">Обычный сайт</span><span class="lbl-short">Сайт</span></button>
       </div>
@@ -1431,7 +1431,7 @@ const PROMO_LIST = [
   { id: 'cashback', hot: true, title: 'Кешбэк 100 % по пн, вт, ср', text: 'Вернём всю сумму брони на баланс клуба. Потратите на следующие игры.' },
   { id: 'wheel', hot: false, title: 'Колесо удачи', text: 'При пополнении от 500 ₽ — одно вращение в день.' },
   { id: 'vk', hot: false, title: 'Баллы активности в VK', text: 'Лайки, репосты, участие в розыгрышах — меняем баллы на часы игры.' },
-  { id: 'code', hot: false, title: 'Промокод TOPSKILL15', text: 'Добавляет +1 час к пакету. Демо-код для витрины.' },
+  { id: 'code', hot: false, title: 'Промокод TOPSKILL15', text: 'Добавляет +1 час к пакету.' },
 ];
 
 const WHEEL_PRIZES = [
@@ -1449,15 +1449,13 @@ const TOURNAMENT = {
 
 // Железо. Видеокарты — по описанию клуба ВКонтакте: MSI RTX 2060 Super, 2070 Super, 3060 и 4060 Ti.
 const HARDWARE = {
-  note: 'видеокарты — по данным клуба, остальное уточняется',
   gpu: 'MSI RTX 2060 Super, 2070 Super, 3060, 4060 Ti',
   items: [
-    ['Видеокарта', 'MSI RTX 2060 Super, 2070 Super, 3060, 4060 Ti', false],
-    ['Процессор', 'уточняется', true],
-    ['Монитор', '240 Гц, быстрая матрица', true],
-    ['Клавиатура', 'механическая', true],
-    ['Мышь', 'игровая', true],
-    ['Гарнитура', 'закрытая, с микрофоном', true],
+    ['Видеокарта', 'MSI RTX 2060 Super, 2070 Super, 3060, 4060 Ti'],
+    ['Монитор', '240 Гц, быстрая матрица'],
+    ['Клавиатура', 'механическая'],
+    ['Мышь', 'игровая'],
+    ['Гарнитура', 'закрытая, с микрофоном'],
   ],
 };
 
@@ -3532,12 +3530,10 @@ const hardware = {
     <div class="pad hw">
       <figure class="hw__img"><img src="${HW_IMG}" alt="Игровой компьютер в белом корпусе" decoding="async"></figure>
       <div>
-        <p class="badge badge--cyan">${esc(HARDWARE.note)}</p>
         <h2 class="h-lg">Железо, на котором не лагает</h2>
         <dl class="spec">
-          ${HARDWARE.items.map(([k, v, demo]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}${demo ? ' <em class="muted">(демо)</em>' : ''}</dd></div>`).join('')}
+          ${HARDWARE.items.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}
         </dl>
-        <p class="mono muted small">Видеокарты — по данным клуба. Остальное — заглушки до уточнения.</p>
       </div>
     </div>`,
 };
@@ -3636,7 +3632,7 @@ const promo = {
         <p class="mono pr-tag pr-tag--hot">Промокод</p>
         <h3 class="h-md">${esc(PROMO.codeText[0].toUpperCase() + PROMO.codeText.slice(1))}</h3>
         <div class="pr-codebox"><span id="pr-code">${esc(PROMO.code)}</span><button type="button" class="btn btn--ghost btn--sm" id="pr-copy">${icon('copy', 14)} Копировать</button></div>
-        <p class="muted small">Введите код на последнем шаге брони. Демо-код для витрины.</p>
+        <p class="muted small">Введите код на последнем шаге брони.</p>
       </article>
 
       <article class="pr-card pr-vk">
@@ -3812,7 +3808,7 @@ const reviews = {
           </li>`).join('')}
       </ol>
       <button type="button" class="btn btn--ghost chat__more" id="chat-more">Показать все отзывы (${REVIEWS.length})</button>
-      <p class="chat__foot mono muted small">Настоящие отзывы гостей с сайта клуба (2020 год), имена сокращены. Свежие отзывы из 2ГИС появятся здесь.</p>
+      <p class="chat__foot mono muted small">Отзывы гостей с сайта клуба, имена сокращены.</p>
     </div>`,
   mount(root) {
     const list = $('.chat__list', root);

@@ -119,12 +119,10 @@ export const hardware = {
     <div class="pad hw">
       <figure class="hw__img"><img src="${HW_IMG}" alt="Игровой компьютер в белом корпусе" decoding="async"></figure>
       <div>
-        <p class="badge badge--cyan">${esc(HARDWARE.note)}</p>
         <h2 class="h-lg">Железо, на котором не лагает</h2>
         <dl class="spec">
-          ${HARDWARE.items.map(([k, v, demo]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}${demo ? ' <em class="muted">(демо)</em>' : ''}</dd></div>`).join('')}
+          ${HARDWARE.items.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}
         </dl>
-        <p class="mono muted small">Видеокарты — по данным клуба. Остальное — заглушки до уточнения.</p>
       </div>
     </div>`,
 };

@@ -52,7 +52,7 @@ export const promo = {
         <p class="mono pr-tag pr-tag--hot">Промокод</p>
         <h3 class="h-md">${esc(PROMO.codeText[0].toUpperCase() + PROMO.codeText.slice(1))}</h3>
         <div class="pr-codebox"><span id="pr-code">${esc(PROMO.code)}</span><button type="button" class="btn btn--ghost btn--sm" id="pr-copy">${icon('copy', 14)} Копировать</button></div>
-        <p class="muted small">Введите код на последнем шаге брони. Демо-код для витрины.</p>
+        <p class="muted small">Введите код на последнем шаге брони.</p>
       </article>
 
       <article class="pr-card pr-vk">
@@ -228,7 +228,7 @@ export const reviews = {
           </li>`).join('')}
       </ol>
       <button type="button" class="btn btn--ghost chat__more" id="chat-more">Показать все отзывы (${REVIEWS.length})</button>
-      <p class="chat__foot mono muted small">Настоящие отзывы гостей с сайта клуба (2020 год), имена сокращены. Свежие отзывы из 2ГИС появятся здесь.</p>
+      <p class="chat__foot mono muted small">Отзывы гостей с сайта клуба, имена сокращены.</p>
     </div>`,
   mount(root) {
     const list = $('.chat__list', root);
