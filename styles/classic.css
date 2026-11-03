@@ -172,7 +172,8 @@
   .js-reveal .reveal .cl-h2 { transition: opacity 0.8s, transform 0.9s var(--ease); }
   .js-reveal .reveal:not(.is-in) .cl-h2 { opacity: 0; transform: translateY(34px); }
   .js-reveal .reveal:not(.is-in) :is(.card, .pack, .pr-card, .msg, .prizes li, .spec > div, .cl-stats > div, .branch) { opacity: 0; }
-  .js-reveal .reveal.is-in :is(.card, .pack, .pr-card, .msg, .prizes li, .spec > div, .cl-stats > div, .branch) { animation: up 0.8s var(--ease) backwards; animation-delay: calc(var(--i, 0) * 70ms + 0.1s); }
+  /* Каскадное появление только при первом показе секции: потом (is-settled) перерисованные карточки, например цены после смены зоны, не мигают. */
+  .js-reveal .reveal.is-in:not(.is-settled) :is(.card, .pack, .pr-card, .msg, .prizes li, .spec > div, .cl-stats > div, .branch) { animation: up 0.8s var(--ease) backwards; animation-delay: calc(var(--i, 0) * 70ms + 0.1s); }
 }
 .cl-h2::after { content: ''; display: block; width: 0; height: 4px; margin-top: 18px; border-radius: 2px; background: var(--accent); transition: width 1s var(--ease) 0.25s; }
 .reveal.is-in .cl-h2::after { width: clamp(64px, 12vw, 160px); }
@@ -261,4 +262,10 @@
   }
   .cl-bar .btn { min-height: 50px; padding: 0 12px; font-size: 15px; text-decoration: none; }
   .cl-foot { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* Смена зоны или типа дня в тарифах: короткая плавная подмена вместо исчезновения и долгого проявления. */
+@media (prefers-reduced-motion: no-preference) {
+  #t-panel > * { animation: panel-swap 0.18s ease-out; }
+  @keyframes panel-swap { from { opacity: 0.4; transform: translateY(6px); } }
 }

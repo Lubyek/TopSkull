@@ -241,6 +241,7 @@ function setupReveal(root) {
     entries.forEach((e) => {
       if (!e.isIntersecting) return;
       e.target.classList.add('is-in');
+      setTimeout(() => e.target.classList.add('is-settled'), 2200); // каскад отыграл: дальше без повторов
       e.target.querySelectorAll('[data-count]').forEach((el) => countUp(el, Number(el.dataset.count), { decimals: Number(el.dataset.dec || 0) }));
       io.unobserve(e.target);
     });
