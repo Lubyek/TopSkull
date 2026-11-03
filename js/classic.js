@@ -40,6 +40,7 @@ function heroHtml() {
         <div class="hero__cta">
           <button type="button" class="btn btn--accent" data-open="book">Забронировать место</button>
           <a class="btn btn--ghost" href="#cl-tariffs">Смотреть тарифы</a>
+          <button type="button" class="btn btn--ghost hero__os" data-mode="os">${icon('grid', 18)} Открыть как приложение TopskillOS</button>
         </div>
         <div class="hero__zone" aria-live="polite">
           <b class="hero__name" id="hero-name"></b>
@@ -228,11 +229,12 @@ export function renderClassic(root) {
   const main = BRANCHES[0];
   root.innerHTML = `
     <header class="cl-nav" id="cl-nav">
-      <button type="button" class="cl-menu" id="cl-menu" aria-expanded="false" aria-controls="cl-panel"><i></i> Меню</button>
+      <button type="button" class="cl-menu" id="cl-menu" aria-expanded="false" aria-controls="cl-panel"><i></i><span>Меню</span></button>
       <a class="logo cl-logo" href="#cl-top" aria-label="TOPSKILL, наверх">TOP<b>SKILL</b><span class="cursor">▮</span></a>
       <span class="cl-nav__r">
         <button type="button" class="btn btn--ghost btn--sm" id="cl-os" data-mode="os">Режим TopskillOS</button>
-        <button type="button" class="btn btn--accent btn--sm" data-open="book">Забронировать</button>
+        <button type="button" class="cl-os-pill" data-mode="os" aria-label="Открыть как приложение: TopskillOS">${icon('grid', 18)}<span>OS</span></button>
+        <button type="button" class="btn btn--accent btn--sm" data-open="book" aria-label="Забронировать"><span class="bk-long">Забронировать</span><span class="bk-short">Бронь</span></button>
       </span>
       <span class="cl-progress" id="cl-progress" aria-hidden="true"></span>
     </header>
