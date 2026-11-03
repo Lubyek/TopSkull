@@ -1,6 +1,6 @@
 // Точка входа: загрузка, рабочий стол, панель задач, док, режимы и пасхалки.
-import { APPS, BRANCHES } from './data.js';
-import { wallNow, money, packPrice } from './pricing.js';
+import { APPS } from './data.js';
+import { wallNow } from './pricing.js';
 import { freeNow } from './availability.js';
 import { onStoreEvent, load, save } from './store.js';
 import { registerApp, openApp, onWindowsChange, isOpen, cycleWindows, closeAllWindows } from './windows.js';
@@ -12,7 +12,7 @@ import { mountAdmin } from './admin.js';
 import { initTerminal } from './terminal.js';
 import { renderClassic } from './classic.js';
 import { icon } from './icons.js';
-import { $, $$, esc, toast, beep, prefersReducedMotion, isMobile, telHref, plural } from './util.js';
+import { $, $$, esc, toast, beep, prefersReducedMotion, isMobile } from './util.js';
 
 const root = document.documentElement;
 const osEl = $('#os');
@@ -42,19 +42,6 @@ function drawIcons() {
     </button>`;
   layoutIcons();
   enableIconDrag();
-}
-
-// ---------- главный экран телефона: виджет с главным действием ----------
-function drawWidget() {
-  const b = BRANCHES[0];
-  $('#m-widget').innerHTML = `
-    <div class="m-widget__top"><span class="logo">TOP<b>SKILL</b></span><span class="mono muted">Челябинск · 24/7</span></div>
-    <p class="m-widget__free"><b id="m-free">--</b><span id="m-free-lbl">мест свободно сейчас</span></p>
-    <p class="m-widget__sub">от ${money(packPrice('hall', 'h1', false))} за час. Новичкам 2 часа в подарок.</p>
-    <div class="m-widget__row">
-      <button type="button" class="btn btn--accent" data-open="book">Забронировать</button>
-      <a class="btn btn--ghost" href="${telHref(b.phone)}" aria-label="Позвонить в клуб ${esc(b.phone)}">${icon('phone', 18)} Позвонить</a>
-    </div>`;
 }
 
 // ---------- иконки на столе: свободное размещение ----------
@@ -227,8 +214,6 @@ function tick() {
 const refreshSeats = () => {
   const n = freeNow();
   $('#free-seats').textContent = n;
-  $('#m-free').textContent = n;
-  $('#m-free-lbl').textContent = plural(n, ['место свободно сейчас', 'места свободно сейчас', 'мест свободно сейчас']);
 };
 
 // ---------- режимы: ОС / обычный сайт ----------
@@ -322,7 +307,6 @@ function runBoot() {
 }
 
 // ---------- запуск ----------
-drawWidget();
 drawIcons();
 drawDock();
 tick();

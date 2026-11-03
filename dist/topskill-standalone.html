@@ -841,13 +841,12 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
    приложения на весь экран с кнопкой «назад». Условие то же, что PHONE_QUERY в js/util.js. */
 
 /* Только для телефона: на компьютере этих элементов нет. */
-.m-widget, .icon--site, .dock__lbl, .win__back, .win__book, .win__name, .status__short, .lbl-short { display: none; }
+.icon--site, .dock__lbl, .win__back, .win__book, .win__name, .status__short, .lbl-short { display: none; }
 .cl-panel__os { display: none; }
 
 @media (max-width: 760px), (max-height: 500px) and (pointer: coarse) {
   :root { --taskbar-h: 44px; --dock-h: 62px; --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); }
   .hide-sm, .win__rs, .win__file, .win__ctl, .taskbar .logo, .taskbar__clock .sec, .lbl-full, .status__full { display: none !important; }
-  .m-widget { display: block; }
   .icon--site { display: flex; }
   .dock__lbl { display: block; }
   .win__back { display: inline-grid; }
@@ -855,6 +854,9 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   .win__name, .lbl-short, .status__short { display: inline; }
 
   html, body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+  /* В мобильной ОС полос прокрутки нет, как на настоящем телефоне. */
+  .desktop, .win__body, .tablewrap, .slots, .term__out, .cl-modal__body { scrollbar-width: none; }
+  .desktop::-webkit-scrollbar, .win__body::-webkit-scrollbar, .tablewrap::-webkit-scrollbar, .slots::-webkit-scrollbar, .term__out::-webkit-scrollbar, .cl-modal__body::-webkit-scrollbar { display: none; }
   button, a, [role=button], input, select, label { touch-action: manipulation; }
   input, select, textarea { font-size: 16px; } /* иначе iOS приближает страницу при вводе */
 
@@ -871,21 +873,6 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
     inset: calc(var(--taskbar-h) + var(--sat)) 0 calc(var(--dock-h) + var(--banner-h) + var(--sab)) 0;
     padding: 10px 16px 16px;
   }
-  .m-widget {
-    margin-bottom: 12px; padding: 14px 16px; border: 1px solid var(--line-2); border-radius: 22px;
-    background: linear-gradient(145deg, rgba(74, 29, 150, 0.55), rgba(19, 12, 33, 0.85) 70%);
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
-  }
-  .m-widget__top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
-  .m-widget .logo { font-size: 16px; }
-  .m-widget__top .mono { font-size: 11px; }
-  .m-widget__free { display: flex; align-items: baseline; gap: 10px; }
-  .m-widget__free b { font: 800 40px/1 var(--font-head); letter-spacing: -0.05em; color: var(--text); }
-  .m-widget__free span { color: var(--muted); font-size: 14px; }
-  .m-widget__sub { margin: 4px 0 12px; font-size: 13px; color: #d5dae6; }
-  .m-widget__row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; }
-  .m-widget__row .btn { min-height: 50px; padding: 0 12px; font-size: 15px; text-decoration: none; }
-
   .icons { position: static; pointer-events: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 4px; }
   .icon { position: static; width: auto; min-height: 86px; padding: 8px 2px; font-size: 12px; line-height: 1.2; cursor: pointer; touch-action: manipulation; }
   .icon:hover { background: none; border-color: transparent; }
@@ -986,12 +973,10 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   .icon { font-size: 11px; }
   .icon__img { width: 56px; height: 56px; }
   .taskbar__right .mono:not(:last-child) { display: none; }
-  .m-widget__free b { font-size: 38px; }
 }
 
 /* Телефон на боку: компактнее. */
 @media (max-height: 500px) and (pointer: coarse) {
-  .m-widget { display: none; }
   .icons { grid-template-columns: repeat(6, 1fr); }
   .icon { min-height: 80px; }
   .icon__img { width: 48px; height: 48px; }
@@ -1067,7 +1052,6 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 
     <main id="desktop" class="desktop" tabindex="-1">
       <h1 class="sr">TOPSKILL: компьютерный клуб в Челябинске, круглосуточно</h1>
-      <section class="m-widget" id="m-widget" aria-label="Клуб сейчас"></section>
       <nav class="icons" id="icons" aria-label="Приложения"></nav>
       <div class="windows" id="windows"></div>
     </main>
@@ -3987,8 +3971,8 @@ return { renderClassic };
 })();
 __m['app'] = (() => {
 // Точка входа: загрузка, рабочий стол, панель задач, док, режимы и пасхалки.
-const { APPS, BRANCHES } = __m['data'];
-const { wallNow, money, packPrice } = __m['pricing'];
+const { APPS } = __m['data'];
+const { wallNow } = __m['pricing'];
 const { freeNow } = __m['availability'];
 const { onStoreEvent, load, save } = __m['store'];
 const { registerApp, openApp, onWindowsChange, isOpen, cycleWindows, closeAllWindows } = __m['windows'];
@@ -4000,7 +3984,7 @@ const { mountAdmin } = __m['admin'];
 const { initTerminal } = __m['terminal'];
 const { renderClassic } = __m['classic'];
 const { icon } = __m['icons'];
-const { $, $$, esc, toast, beep, prefersReducedMotion, isMobile, telHref, plural } = __m['util'];
+const { $, $$, esc, toast, beep, prefersReducedMotion, isMobile } = __m['util'];
 
 const root = document.documentElement;
 const osEl = $('#os');
@@ -4030,19 +4014,6 @@ function drawIcons() {
     </button>`;
   layoutIcons();
   enableIconDrag();
-}
-
-// ---------- главный экран телефона: виджет с главным действием ----------
-function drawWidget() {
-  const b = BRANCHES[0];
-  $('#m-widget').innerHTML = `
-    <div class="m-widget__top"><span class="logo">TOP<b>SKILL</b></span><span class="mono muted">Челябинск · 24/7</span></div>
-    <p class="m-widget__free"><b id="m-free">--</b><span id="m-free-lbl">мест свободно сейчас</span></p>
-    <p class="m-widget__sub">от ${money(packPrice('hall', 'h1', false))} за час. Новичкам 2 часа в подарок.</p>
-    <div class="m-widget__row">
-      <button type="button" class="btn btn--accent" data-open="book">Забронировать</button>
-      <a class="btn btn--ghost" href="${telHref(b.phone)}" aria-label="Позвонить в клуб ${esc(b.phone)}">${icon('phone', 18)} Позвонить</a>
-    </div>`;
 }
 
 // ---------- иконки на столе: свободное размещение ----------
@@ -4215,8 +4186,6 @@ function tick() {
 const refreshSeats = () => {
   const n = freeNow();
   $('#free-seats').textContent = n;
-  $('#m-free').textContent = n;
-  $('#m-free-lbl').textContent = plural(n, ['место свободно сейчас', 'места свободно сейчас', 'мест свободно сейчас']);
 };
 
 // ---------- режимы: ОС / обычный сайт ----------
@@ -4310,7 +4279,6 @@ function runBoot() {
 }
 
 // ---------- запуск ----------
-drawWidget();
 drawIcons();
 drawDock();
 tick();
