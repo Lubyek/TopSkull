@@ -240,3 +240,33 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   .map__show { display: inline-flex; width: 100%; border: 0; border-radius: 0; min-height: 52px; }
   .map__live iframe { min-height: 300px; }
 }
+
+/* ---------- Телефон: компактнее и меньше текста (приложения и обычный сайт) ---------- */
+.chat__more { display: none; }
+@media (max-width: 760px) {
+  /* Тарифы: зоны одной лентой, которую можно листать. */
+  .row--between > .tabs { flex: 1 1 100%; min-width: 0; }
+  .tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: none; min-height: 44px; }
+
+  /* Зоны: список строк, описание в две строки, нажатие раскрывает. */
+  .zones { grid-template-columns: 1fr; gap: 8px; }
+  .zones .card { display: grid; grid-template-columns: 64px 1fr; column-gap: 14px; row-gap: 2px; padding: 14px; align-items: start; cursor: pointer; }
+  .zones .card > .plan, .zones .card > .card__ico { grid-column: 1; grid-row: 1 / span 3; align-self: center; width: 64px; max-height: 56px; margin: 0; }
+  .zones .card > :not(.plan):not(.card__ico) { grid-column: 2; margin: 0; }
+  .zones .card p:not(.mono) { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .zones .card.is-open p:not(.mono) { -webkit-line-clamp: unset; }
+  .zones .card .mono { font-size: 12px; }
+
+  /* Железо: без большого фото, только характеристики. */
+  .hw__img { display: none; }
+
+  /* Новости: короткие карточки. */
+  .news__item { min-height: 0; }
+  .news__item p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+
+  /* Отзывы: первые три, остальные по кнопке. */
+  .chat__list:not(.is-all) .msg:nth-child(n + 4) { display: none; }
+  .chat__more { display: flex; width: calc(100% - 32px); margin: 8px 16px 12px; }
+}

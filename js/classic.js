@@ -133,9 +133,26 @@ function setupScroll(root) {
   const nav = root.querySelector('#cl-nav');
   const bar = root.querySelector('#cl-progress');
   const hero = root.querySelector('.hero');
+  const chips = root.querySelector('#cl-chips');
+  const secs = [...root.querySelectorAll('.cl-sec')];
+  let activeSec = '';
   let raf = 0;
   const update = () => {
     raf = 0;
+    // Подсветка раздела в ленте чипов: последний, чей верх уже поднялся выше 40% экрана.
+    let cur = '';
+    secs.forEach((s) => { if (s.getBoundingClientRect().top < root.clientHeight * 0.4) cur = s.id; });
+    if (cur !== activeSec) {
+      activeSec = cur;
+      chips.querySelectorAll('.cl-chip').forEach((c) => {
+        const on = c.dataset.sec === cur;
+        c.classList.toggle('is-on', on);
+        if (on) {
+          c.setAttribute('aria-current', 'true');
+          if (chips.scrollWidth > chips.clientWidth) chips.scrollTo({ left: c.offsetLeft - (chips.clientWidth - c.offsetWidth) / 2, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+        } else c.removeAttribute('aria-current');
+      });
+    }
     const max = root.scrollHeight - root.clientHeight;
     const y = root.scrollTop;
     bar.style.transform = `scaleX(${max > 0 ? (y / max).toFixed(4) : 0})`;
@@ -223,6 +240,18 @@ function setupMenu(root) {
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { set(false); btn.focus(); } });
 }
 
+/** Переходы по якорям без записей в истории: иначе «назад» на телефоне листала бы разделы, а не возвращала со страницы. */
+function setupAnchors(root) {
+  root.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#cl-"]');
+    if (!a) return;
+    const target = root.querySelector(a.getAttribute('href'));
+    if (!target) return;
+    e.preventDefault();
+    target.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+  });
+}
+
 export function renderClassic(root) {
   if (built) return;
   built = true;
@@ -238,6 +267,9 @@ export function renderClassic(root) {
       </span>
       <span class="cl-progress" id="cl-progress" aria-hidden="true"></span>
     </header>
+    <nav class="cl-chips" id="cl-chips" aria-label="Быстрый переход по разделам">
+      ${PARTS.map(([id, t]) => `<a class="cl-chip" href="#cl-${id}" data-sec="cl-${id}">${t}</a>`).join('')}
+    </nav>
     <nav class="cl-panel" id="cl-panel" aria-label="Разделы" hidden>
       ${PARTS.map(([id, t], n) => `<a href="#cl-${id}"><span class="mono">0${n + 1}</span>${t}</a>`).join('')}
       <button type="button" class="cl-panel__os" data-mode="os">${icon('grid', 20)} Открыть как приложение: TopskillOS</button>
@@ -248,6 +280,10 @@ export function renderClassic(root) {
       <div class="reveal">${statsHtml()}</div>
       <div id="cl-parts"></div>
     </main>
+    <div class="cl-bar" id="cl-bar">
+      <button type="button" class="btn btn--accent" data-open="book">Забронировать</button>
+      <a class="btn btn--ghost" href="${telHref(main.phone)}" aria-label="Позвонить в клуб ${esc(main.phone)}">${icon('phone', 18)} Позвонить</a>
+    </div>
     <footer class="cl-foot">
       <div class="cl-foot__word" aria-hidden="true">TOPSKILL</div>
       <div class="cl-foot__row">
@@ -269,6 +305,7 @@ export function renderClassic(root) {
     part.mount?.(sec);
   });
 
+  setupAnchors(root);
   setupHero(root);
   fitHeadline(root);
   addFaqSchema();

@@ -155,4 +155,11 @@ export const zones = {
           <p>${esc(z.desc)}</p>
         </article>`).join('')}
     </div>`,
+  // На телефоне описание зоны свёрнуто до двух строк, нажатие раскрывает карточку.
+  mount(root) {
+    $$('.zones .card', root).forEach((c) => c.addEventListener('click', (e) => {
+      if (e.target.closest('a, button')) return;
+      c.classList.toggle('is-open');
+    }));
+  },
 };

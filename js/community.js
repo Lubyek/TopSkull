@@ -220,8 +220,14 @@ export const reviews = {
               <span class="mono muted small"><time datetime="${esc(r.date)}">${esc(reviewDate(r.date))}</time>${r.score ? ` · <span class="msg__score">${esc(r.score)}</span>` : ''}</span></div>
           </li>`).join('')}
       </ol>
+      <button type="button" class="btn btn--ghost chat__more" id="chat-more">Показать все отзывы (${REVIEWS.length})</button>
       <p class="chat__foot mono muted small">Настоящие отзывы гостей с сайта клуба (2020 год), имена сокращены. Свежие отзывы из 2ГИС появятся здесь.</p>
     </div>`,
+  mount(root) {
+    const list = $('.chat__list', root);
+    const more = $('#chat-more', root);
+    more.addEventListener('click', () => { list.classList.add('is-all'); more.hidden = true; });
+  },
 };
 
 // ---------- Турнир ----------
@@ -384,6 +390,8 @@ export const faq = {
   mount(root) {
     // Запасной вариант для браузеров без name у <details>: открыт только один вопрос.
     const items = $$('.faq__item', root);
+    // На телефоне первый вопрос тоже свёрнут: так виден весь список.
+    if (window.matchMedia('(max-width: 760px)').matches) items.forEach((d) => d.removeAttribute('open'));
     items.forEach((d) => d.addEventListener('toggle', () => { if (d.open) items.forEach((o) => { if (o !== d) o.open = false; }); }));
   },
 };

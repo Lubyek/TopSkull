@@ -212,3 +212,36 @@
   .cl-nav__r { gap: 6px; }
   .cl-nav { padding-inline: 8px; }
 }
+
+/* ---------- Телефон: быстрая навигация, закреплённая панель брони, меньше воздуха ---------- */
+.cl-chips, .cl-bar { display: none; }
+@media (max-width: 760px) {
+  .cl-nav { height: 56px; padding-block: 0; }
+  .cl-nav.is-scrolled { padding-block: 0; }
+  .cl-nav__r [data-open='book'], .cl-foot [data-open='book'] { display: none; } /* кнопка брони теперь в нижней панели */
+
+  .cl-chips {
+    position: sticky; top: 56px; z-index: 39; display: flex; gap: 8px; overflow-x: auto; padding: 8px 12px;
+    scrollbar-width: none; background: rgba(8, 5, 14, 0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line);
+    -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+  }
+  .cl-chips::-webkit-scrollbar { display: none; }
+  .cl-chip {
+    flex: none; display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border: 1px solid var(--line-2); border-radius: 999px;
+    color: var(--muted); font: 600 14px var(--font-body); text-decoration: none; transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .cl-chip.is-on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .cl-chip:active { transform: scale(0.96); }
+
+  .cl-sec { scroll-margin-top: 112px; padding-top: 36px; }
+  .cl-h2 { margin-bottom: 16px; }
+  .cl-h2::after { margin-top: 12px; }
+  .cl-stats { padding-top: 28px; }
+
+  .cl-bar {
+    position: fixed; z-index: 30; left: 0; right: 0; bottom: var(--banner-h); display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); background: rgba(8, 5, 14, 0.94); backdrop-filter: blur(14px); border-top: 1px solid var(--line-2);
+  }
+  .cl-bar .btn { min-height: 50px; padding: 0 12px; font-size: 15px; text-decoration: none; }
+  .cl-foot { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+}
