@@ -108,8 +108,8 @@
 .pr-legend i { flex: none; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 7px; background: color-mix(in srgb, var(--c) 26%, transparent); border: 1px solid var(--c); font: 700 11px var(--font-mono); font-style: normal; color: #fff; }
 
 /* ---------- филиалы ---------- */
-/* Узкий вертикальный столбик, как на телефоне: линия филиалов, карта, карточка. На широком экране стоит по центру. */
-.branches { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 540px; margin-inline: auto; }
+/* Узкий вертикальный столбик, как на телефоне: линия филиалов, карта, карточка. На широком экране прижат к левому краю. */
+.branches { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 540px; }
 .map { margin: 0; border: 1px solid var(--line-2); border-radius: var(--radius); overflow: hidden; }
 .map__stub svg { display: block; width: 100%; aspect-ratio: 1; }
 .map__live iframe { display: block; width: 100%; aspect-ratio: auto; height: 240px; min-height: 0; border: 0; background: var(--surface-2); }
@@ -173,6 +173,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 
 /* ---------- вертикальный ритм окон ---------- */
 .win__body > .home, .win__body > .hw, .win__body > .branches { min-height: 100%; }
+.win__body > .branches { margin-inline: auto; } /* в окне ОС столбик филиалов по центру, на сайте слева */
 .home { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
 .home .stats { width: 100%; margin: 0; }
 .home .h-xl { margin-bottom: 0; }
