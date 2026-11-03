@@ -22,7 +22,7 @@ export const home = {
         <button type="button" class="btn btn--accent" data-open="book">Забронировать место</button>
         <button type="button" class="btn btn--ghost" data-open="tariffs">Смотреть тарифы</button>
       </div>
-      <p class="mono muted small">Формат нового клуба: игровые ПК, кибершкола с тренерами, лаунж-зоны с PS5, кинозал и VR.</p>
+      <p class="mono muted small">Клуб нового формата в самом центре города: мощное железо, лаунж-зоны и VIP-зоны с PS5, кинотеатр с экраном на всю стену.</p>
     </div>`,
   mount(root) {
     $$('[data-count]', root).forEach((el) => countUp(el, Number(el.dataset.count), { decimals: Number(el.dataset.dec || 0) }));

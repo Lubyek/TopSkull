@@ -21,9 +21,9 @@ const PARTS = [
 
 // Зоны на первом экране: тема, фото (вырезано без фона, см. tools/cutout.sh) и подпись.
 const SLIDES = [
-  { zone: 'hall', theme: 'lime', name: 'Общий зал', img: 'assets/pc.webp', alt: 'Игровой компьютер в белом корпусе', cls: 'pc', text: 'Игровые ПК в открытом зале. Для одиночной игры и компании до 6 человек.' },
+  { zone: 'hall', theme: 'lime', name: 'Общий зал', img: 'assets/pc.webp', alt: 'Игровой компьютер в белом корпусе', cls: 'pc', text: 'Мощные ПК на базе MSI RTX в открытом зале. Для одиночной игры и компании до 6 человек.' },
   { zone: 'boot', theme: 'cyan', name: 'Bootcamp', img: 'assets/head.webp', alt: 'Беспроводная игровая гарнитура', cls: 'head', text: 'Закрытый зал на 6 мест. Можно арендовать целиком для команды или компании.' },
-  { zone: 'vip75', theme: 'hot', name: 'VIP PS5', img: 'assets/pad.webp', alt: 'Белый геймпад', cls: 'pad', text: 'Своя комната, PS5 и телевизор 75". Диваны, звук, дверь на замок.' },
+  { zone: 'vip75', theme: 'hot', name: 'VIP PS5', img: 'assets/pad.webp', alt: 'Белый геймпад', cls: 'pad', text: 'Закрытая VIP-зона с PS5, большим экраном и качественной аудиосистемой.' },
 ];
 
 let built = false;
@@ -36,7 +36,7 @@ function heroHtml() {
       <div class="hero__copy">
         <p class="hero__eyebrow mono">Челябинск · открыто ${CLUB.hours}</p>
         <h1 class="hero__h1" aria-label="Играй на максимуме"><span class="ln" aria-hidden="true"><span>Играй на</span></span> <span class="ln" aria-hidden="true"><span class="grad">максимуме</span></span></h1>
-        <p class="hero__lead">Мощные ПК, PS5 и Bootcamp для команд в центре города. Новичкам два часа в подарок.</p>
+        <p class="hero__lead">Компьютерный клуб нового формата в самом центре Челябинска: мощное железо, PS5 и кинотеатр. Новичкам два часа в подарок.</p>
         <div class="hero__cta">
           <button type="button" class="btn btn--accent" data-open="book">Забронировать место</button>
           <a class="btn btn--ghost" href="#cl-tariffs">Смотреть тарифы</a>
