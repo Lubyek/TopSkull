@@ -3,7 +3,7 @@
 // системная «назад» и свайп вниз по заголовку возвращают на главный экран.
 import { APPS } from './data.js';
 import { icon } from './icons.js';
-import { pushLayer, closeLayer, dropLayer, resetLayers } from './nav.js';
+import { pushLayer, closeLayer, dropLayer } from './nav.js';
 import { esc, isMobile, prefersReducedMotion } from './util.js';
 
 const registry = new Map(); // id → render(body, ctx) → необязательная функция очистки
@@ -95,7 +95,6 @@ export function openApp(id, opts = {}) {
   let existing = wins.get(id);
   if (existing?.closing) { closeNow(id, true); existing = null; } // окно ещё закрывается: открываем заново
   if (existing) {
-    if (isMobile() && !existing.layer) attachLayer(id, existing); // свёрнутое приложение снова стало слоем истории
     focusWindow(id);
     existing.el.querySelector('.win__body')?.focus({ preventScroll: true });
     return existing.el;
@@ -159,32 +158,15 @@ function attachLayer(id, entry) {
   entry.layer = pushLayer({ close: () => closeNow(id), back: () => !!entry.ctx.onBack?.() });
 }
 
-/**
- * Телефон: «домой». Все приложения уходят в фон вместе с состоянием (шаги брони, введённый текст),
- * значки на главном экране показывают, что они запущены. Системная «назад» на главном экране уже ничего не закрывает.
- */
-export function goHome() {
-  resetLayers();
-  wins.forEach((w) => {
-    w.layer = null;
-    w.el.style.transition = '';
-    w.el.style.transform = '';
-    w.el.style.opacity = '';
-    w.el.classList.add('is-min');
-    w.el.classList.remove('is-active');
-  });
-  notify();
-}
-
-/** Свайп вниз: приложение уезжает вниз и сворачивается. */
+/** Свайп вниз: приложение уезжает вниз и закрывается. */
 function swipeAway(id) {
   const w = wins.get(id);
   if (!w || w.closing) return;
-  if (prefersReducedMotion()) { goHome(); return; }
-  w.el.style.transition = 'transform 0.22s var(--ease), opacity 0.22s';
+  if (prefersReducedMotion()) { closeWindow(id); return; }
+  w.el.style.transition = 'transform 0.2s var(--ease), opacity 0.2s';
   w.el.style.transform = 'translateY(100%)';
   w.el.style.opacity = '0';
-  setTimeout(goHome, 230);
+  setTimeout(() => closeWindow(id), 190);
 }
 
 export function closeWindow(id) {
@@ -311,7 +293,7 @@ function moveBy(el, dx, dy) {
   el.style.top = `${y}px`;
 }
 
-/** Телефон: потянуть вниз за верх содержимого (когда оно прокручено до начала) тоже сворачивает приложение. */
+/** Телефон: потянуть вниз за верх содержимого (когда оно прокручено до начала) тоже закрывает приложение. */
 function enablePullDown(el, id) {
   const body = el.querySelector('.win__body');
   let t = null;
@@ -355,7 +337,7 @@ function enableDrag(el, bar, id) {
   bar.addEventListener('pointermove', (e) => {
     if (!dragging) return;
     if (isMobile()) {
-      // Свайп вниз по заголовку сворачивает приложение.
+      // Свайп вниз по заголовку закрывает приложение.
       swipe = Math.max(0, e.clientY - sy);
       el.style.transform = `translateY(${swipe}px)`;
       el.style.opacity = String(1 - Math.min(0.6, swipe / 400));

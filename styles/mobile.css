@@ -44,9 +44,6 @@
   .icon__img { width: 60px; height: 60px; border-radius: 16px; }
   .icon__img svg { width: 28px; height: 28px; }
   .icon--site .icon__img { color: var(--cyan); }
-  /* Свёрнутое приложение ждёт в фоне: точка под значком. */
-  .icon { position: relative; }
-  .icon.is-running::after { content: ''; position: absolute; left: 50%; top: 66px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
 
   /* Нижняя панель: основные приложения с подписями. */
   .dock {

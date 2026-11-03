@@ -980,9 +980,6 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   .icon__img { width: 60px; height: 60px; border-radius: 16px; }
   .icon__img svg { width: 28px; height: 28px; }
   .icon--site .icon__img { color: var(--cyan); }
-  /* Свёрнутое приложение ждёт в фоне: точка под значком. */
-  .icon { position: relative; }
-  .icon.is-running::after { content: ''; position: absolute; left: 50%; top: 66px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
 
   /* Нижняя панель: основные приложения с подписями. */
   .dock {
@@ -2135,7 +2132,7 @@ __m['windows'] = (() => {
 // системная «назад» и свайп вниз по заголовку возвращают на главный экран.
 const { APPS } = __m['data'];
 const { icon } = __m['icons'];
-const { pushLayer, closeLayer, dropLayer, resetLayers } = __m['nav'];
+const { pushLayer, closeLayer, dropLayer } = __m['nav'];
 const { esc, isMobile, prefersReducedMotion } = __m['util'];
 
 const registry = new Map(); // id → render(body, ctx) → необязательная функция очистки
@@ -2227,7 +2224,6 @@ function openApp(id, opts = {}) {
   let existing = wins.get(id);
   if (existing?.closing) { closeNow(id, true); existing = null; } // окно ещё закрывается: открываем заново
   if (existing) {
-    if (isMobile() && !existing.layer) attachLayer(id, existing); // свёрнутое приложение снова стало слоем истории
     focusWindow(id);
     existing.el.querySelector('.win__body')?.focus({ preventScroll: true });
     return existing.el;
@@ -2291,32 +2287,15 @@ function attachLayer(id, entry) {
   entry.layer = pushLayer({ close: () => closeNow(id), back: () => !!entry.ctx.onBack?.() });
 }
 
-/**
- * Телефон: «домой». Все приложения уходят в фон вместе с состоянием (шаги брони, введённый текст),
- * значки на главном экране показывают, что они запущены. Системная «назад» на главном экране уже ничего не закрывает.
- */
-function goHome() {
-  resetLayers();
-  wins.forEach((w) => {
-    w.layer = null;
-    w.el.style.transition = '';
-    w.el.style.transform = '';
-    w.el.style.opacity = '';
-    w.el.classList.add('is-min');
-    w.el.classList.remove('is-active');
-  });
-  notify();
-}
-
-/** Свайп вниз: приложение уезжает вниз и сворачивается. */
+/** Свайп вниз: приложение уезжает вниз и закрывается. */
 function swipeAway(id) {
   const w = wins.get(id);
   if (!w || w.closing) return;
-  if (prefersReducedMotion()) { goHome(); return; }
-  w.el.style.transition = 'transform 0.22s var(--ease), opacity 0.22s';
+  if (prefersReducedMotion()) { closeWindow(id); return; }
+  w.el.style.transition = 'transform 0.2s var(--ease), opacity 0.2s';
   w.el.style.transform = 'translateY(100%)';
   w.el.style.opacity = '0';
-  setTimeout(goHome, 230);
+  setTimeout(() => closeWindow(id), 190);
 }
 
 function closeWindow(id) {
@@ -2443,7 +2422,7 @@ function moveBy(el, dx, dy) {
   el.style.top = `${y}px`;
 }
 
-/** Телефон: потянуть вниз за верх содержимого (когда оно прокручено до начала) тоже сворачивает приложение. */
+/** Телефон: потянуть вниз за верх содержимого (когда оно прокручено до начала) тоже закрывает приложение. */
 function enablePullDown(el, id) {
   const body = el.querySelector('.win__body');
   let t = null;
@@ -2487,7 +2466,7 @@ function enableDrag(el, bar, id) {
   bar.addEventListener('pointermove', (e) => {
     if (!dragging) return;
     if (isMobile()) {
-      // Свайп вниз по заголовку сворачивает приложение.
+      // Свайп вниз по заголовку закрывает приложение.
       swipe = Math.max(0, e.clientY - sy);
       el.style.transform = `translateY(${swipe}px)`;
       el.style.opacity = String(1 - Math.min(0.6, swipe / 400));
@@ -2571,7 +2550,7 @@ function enableResize(el) {
   });
 }
 
-return { registerApp, onWindowsChange, state, focusWindow, openApp, goHome, closeWindow, closeAllWindows, cycleWindows, isOpen };
+return { registerApp, onWindowsChange, state, focusWindow, openApp, closeWindow, closeAllWindows, cycleWindows, isOpen };
 })();
 __m['ticket'] = (() => {
 // Билет-ваучер после брони: QR-заглушка, .ics для календаря, копирование и звонок.
@@ -4345,7 +4324,6 @@ function enableIconDrag() {
 window.addEventListener('resize', () => layoutIcons());
 
 function drawDock(state = {}) {
-  $$('.icon[data-app-btn]').forEach((el) => el.classList.toggle('is-running', !!state[el.dataset.appBtn]));
   const base = APPS.filter((a) => a.dock);
   const extra = APPS.filter((a) => !a.dock && state[a.id]);
   const btn = (a) => `<button type="button" class="dock__btn${state[a.id] === 'open' ? ' is-open' : ''}${state[a.id] === 'min' ? ' is-open is-min' : ''}"

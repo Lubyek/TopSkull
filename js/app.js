@@ -135,7 +135,6 @@ function enableIconDrag() {
 window.addEventListener('resize', () => layoutIcons());
 
 function drawDock(state = {}) {
-  $$('.icon[data-app-btn]').forEach((el) => el.classList.toggle('is-running', !!state[el.dataset.appBtn]));
   const base = APPS.filter((a) => a.dock);
   const extra = APPS.filter((a) => !a.dock && state[a.id]);
   const btn = (a) => `<button type="button" class="dock__btn${state[a.id] === 'open' ? ' is-open' : ''}${state[a.id] === 'min' ? ' is-open is-min' : ''}"
