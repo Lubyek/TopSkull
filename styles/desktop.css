@@ -1,0 +1,130 @@
+/* ---------- рабочий стол ---------- */
+.os { position: fixed; inset: 0; overflow: hidden; }
+
+.wallpaper { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.wallpaper__grad {
+  position: absolute; inset: -20%;
+  background:
+    radial-gradient(40% 40% at 20% 30%, rgba(155, 140, 255, 0.14), transparent 70%),
+    radial-gradient(45% 45% at 80% 70%, rgba(157, 92, 255, 0.1), transparent 70%),
+    radial-gradient(35% 35% at 60% 10%, rgba(255, 92, 200, 0.08), transparent 70%);
+  animation: drift 40s ease-in-out infinite alternate;
+}
+@keyframes drift { to { transform: translate3d(4%, -3%, 0) scale(1.08); } }
+.wallpaper__grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(80% 80% at 50% 40%, #000 30%, transparent 100%);
+}
+.wallpaper__word {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -54%); width: 100%; text-align: center;
+  font: 800 clamp(110px, 26vw, 460px)/0.8 var(--font-head); letter-spacing: -0.06em; white-space: nowrap;
+  color: rgba(255, 255, 255, 0.045); user-select: none;
+}
+.wallpaper__noise { position: absolute; inset: 0; opacity: 0.035; mix-blend-mode: screen; }
+
+/* ---------- панель задач ---------- */
+.taskbar {
+  position: absolute; z-index: 40; left: 0; right: 0; top: 0; height: var(--taskbar-h);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 14px; gap: 12px;
+  background: rgba(8, 5, 14, 0.7); backdrop-filter: blur(18px); border-bottom: 1px solid var(--line);
+}
+.taskbar__clock { position: absolute; left: 50%; transform: translateX(-50%); font: 600 13px var(--font-mono); letter-spacing: 0.08em; }
+.taskbar__right { display: flex; align-items: center; gap: 14px; }
+.status { display: inline-flex; align-items: center; gap: 6px; font: 600 12px var(--font-mono); color: var(--accent); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.45; } }
+.taskbar b { color: var(--cyan); font-weight: 600; }
+
+/* ---------- стол ---------- */
+.desktop { position: absolute; z-index: 1; inset: var(--taskbar-h) 0 calc(var(--dock-h) + var(--banner-h)) 0; outline: none; }
+
+/* Иконки лежат свободно: их можно перетаскивать, положение запоминается (js/app.js). */
+.icons { position: absolute; inset: 0; pointer-events: none; }
+.icon {
+  position: absolute; left: 0; top: 0; pointer-events: auto; width: 92px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 4px;
+  background: none; border: 1px solid transparent; border-radius: 12px; color: var(--text);
+  font: 500 11px var(--font-body); text-align: center; cursor: grab; touch-action: none; user-select: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+.icon.is-dragging { cursor: grabbing; z-index: 5; background: rgba(255, 255, 255, 0.1); border-color: var(--line-2); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45); transition: none; }
+.icon:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--line); }
+.icon__img { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line-2); color: var(--accent); }
+.icon__img svg, .dock__btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- окна ---------- */
+.windows { position: absolute; inset: 0; pointer-events: none; }
+.win {
+  position: absolute; pointer-events: auto; display: flex; flex-direction: column; min-width: 320px; min-height: 220px;
+  background: var(--surface); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--line-2); border-radius: var(--radius); overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  animation: win-in 0.24s var(--ease);
+}
+@keyframes win-in { from { opacity: 0; transform: translate(var(--from-x, 0), var(--from-y, 20px)) scale(0.82); } }
+.win.is-active { border-color: rgba(157, 92, 255, 0.45); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(157, 92, 255, 0.15), 0 0 32px rgba(157, 92, 255, 0.1); }
+.win.is-min { display: none; }
+/* Развёрнутое окно закрывает панель задач и док; полоса демо-баннера остаётся видна. */
+.win.is-max { position: fixed; inset: 0 0 var(--banner-h) 0 !important; width: auto !important; height: auto !important; z-index: 500 !important; border-radius: 0; }
+.os.has-max .desktop { z-index: auto; }
+.win.is-closing { animation: win-out 0.18s ease-in forwards; }
+@keyframes win-out { to { opacity: 0; transform: scale(0.9) translateY(12px); } }
+
+.win__bar {
+  display: flex; align-items: center; gap: 10px; padding: 0 8px 0 14px; height: 40px; flex: none;
+  border-bottom: 1px solid var(--line); cursor: grab; user-select: none; touch-action: none;
+}
+.win__bar:active { cursor: grabbing; }
+.win__title { flex: 1; font: 600 11px var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.win.is-active .win__title { color: var(--text); }
+.win__ctl { display: flex; gap: 2px; }
+.win__ctl .icon-btn:last-child:hover { background: var(--hot); color: #fff; }
+.win__body { flex: 1; overflow: auto; position: relative; }
+
+/* Ручки изменения размера: края и углы окна. */
+.win__rs { position: absolute; z-index: 6; touch-action: none; }
+.win__rs--n, .win__rs--s { left: 14px; right: 14px; height: 6px; cursor: ns-resize; }
+.win__rs--e, .win__rs--w { top: 14px; bottom: 14px; width: 6px; cursor: ew-resize; }
+.win__rs--n { top: 0; } .win__rs--s { bottom: 0; } .win__rs--e { right: 0; } .win__rs--w { left: 0; }
+.win__rs--ne, .win__rs--nw, .win__rs--se, .win__rs--sw { width: 14px; height: 14px; }
+.win__rs--ne { top: 0; right: 0; cursor: nesw-resize; } .win__rs--sw { bottom: 0; left: 0; cursor: nesw-resize; }
+.win__rs--nw { top: 0; left: 0; cursor: nwse-resize; } .win__rs--se { bottom: 0; right: 0; cursor: nwse-resize; }
+.win.is-max .win__rs { display: none; }
+.win.is-resizing { transition: none; user-select: none; }
+
+/* ---------- док ---------- */
+.dock {
+  position: absolute; z-index: 40; left: 50%; bottom: calc(10px + var(--banner-h)); transform: translateX(-50%);
+  display: flex; align-items: flex-end; gap: 6px; padding: 8px 10px;
+  background: rgba(19, 12, 33, 0.72); backdrop-filter: blur(18px); border: 1px solid var(--line-2); border-radius: 20px;
+  max-width: 96vw;
+}
+.dock__btn {
+  position: relative; width: 48px; height: 48px; display: grid; place-items: center; padding: 0;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 13px; color: var(--text);
+  transition: transform 0.18s var(--ease), border-color 0.15s;
+}
+.dock__btn:hover, .dock__btn:focus-visible { transform: translateY(-8px) scale(1.2); border-color: var(--accent); color: var(--accent); }
+.dock__btn.is-open::after { content: ''; position: absolute; bottom: -7px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--accent); }
+.dock__btn.is-min::after { background: var(--muted); }
+.dock__sep { width: 1px; height: 32px; background: var(--line-2); align-self: center; margin: 0 4px; }
+
+/* ---------- всплывающие уведомления ---------- */
+.toasts { position: fixed; z-index: 1200; top: 54px; right: 14px; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast {
+  pointer-events: auto; min-width: 240px; max-width: 340px; padding: 12px 14px; border-radius: 12px;
+  background: var(--surface-solid); border: 1px solid var(--accent); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: toast-in 0.3s var(--ease); font-size: 13px;
+}
+.toast b { color: var(--accent); }
+.toast--hot { border-color: var(--hot); }
+.toast--hot b { color: var(--hot); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-14px) scale(0.96); } }
+
+/* ---------- режим RGB (Konami) ---------- */
+.rgb .win { border-color: transparent; background-image: linear-gradient(var(--surface-solid), var(--surface-solid)), conic-gradient(from var(--ang, 0deg), #ff5cc8, #9d5cff, #9b8cff, #ff5cc8); background-origin: border-box; background-clip: padding-box, border-box; animation: spin-rgb 4s linear infinite; }
+@property --ang { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@keyframes spin-rgb { to { --ang: 360deg; } }
+
+.book-fab { display: none; }

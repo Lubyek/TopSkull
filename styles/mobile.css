@@ -1,0 +1,90 @@
+/* Телефон и узкие экраны: окна становятся полноэкранными «приложениями». */
+@media (max-width: 760px) {
+  :root { --dock-h: 64px; }
+  .hide-sm { display: none !important; }
+
+  .taskbar { padding: 0 12px; }
+  .taskbar__clock { position: static; transform: none; margin-left: auto; font-size: 12px; }
+  .taskbar__right { gap: 10px; }
+  .taskbar__right .mono { font-size: 11px; }
+  .status { font-size: 11px; }
+  #mode-toggle { display: none; }
+
+  /* Рабочий стол = главный экран мобильной ОС: плакат и сетка иконок. */
+  .desktop { z-index: auto; display: block; overflow-y: auto; padding: 14px 16px calc(var(--dock-h) + var(--banner-h) + 84px); }
+    .icons { position: static; pointer-events: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; overflow: visible; }
+  .icon { position: static; width: auto; min-height: 88px; font-size: 11px; cursor: pointer; touch-action: auto; }
+  .win__rs { display: none; }
+  .icon__img { width: 52px; height: 52px; }
+
+  .windows { position: static; }
+  .win {
+    position: fixed; left: 0 !important; top: 0 !important; width: 100% !important; height: 100dvh !important;
+    z-index: 200 !important; border-radius: 0; border: 0; min-width: 0; min-height: 0;
+    animation: sheet-in 0.26s var(--ease);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .win.is-active { box-shadow: none; }
+  @keyframes sheet-in { from { transform: translateY(100%); } }
+  .win__bar { height: 52px; padding: 0 6px 0 16px; }
+  .win__bar::before { content: ''; position: absolute; left: 50%; top: 6px; width: 40px; height: 4px; margin-left: -20px; border-radius: 2px; background: var(--line-2); }
+  .win__bar { position: relative; }
+  .icon-btn { width: 44px; height: 44px; flex: none; }
+
+  /* Нижний док: 4 основные иконки. */
+  .dock { left: 0; right: 0; bottom: var(--banner-h); transform: none; max-width: none; border-radius: 0; border-width: 1px 0 0; justify-content: space-around; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); }
+  .dock__btn { width: 48px; height: 48px; }
+  .dock__btn:hover, .dock__btn:focus-visible { transform: none; }
+  .dock__sep, .dock__btn:nth-child(n + 6) { display: none; }
+  .book-fab {
+    display: block; position: fixed; z-index: 45; left: 16px; right: 16px; bottom: calc(var(--dock-h) + var(--banner-h) + 14px + env(safe-area-inset-bottom));
+    min-height: 52px; border: 0; border-radius: 14px; background: var(--accent); color: var(--accent-ink); font: 700 15px var(--font-body);
+    box-shadow: 0 10px 30px rgba(157, 92, 255, 0.28);
+  }
+  html.has-banner { --banner-h: 44px; }
+  .demo-banner { z-index: 90; font-size: 10px; line-height: 1.3; }
+  .toasts { left: 10px; right: 10px; top: 52px; }
+  .toast { max-width: none; }
+  .term { top: 6%; }
+
+  /* Элементы внутри окон. */
+  .btn--sm, .tab, .seg__b, .st, .toolbar input:not([type=checkbox]), .toolbar select, .range input { min-height: 44px; }
+  .st { min-width: 44px; }
+  .pad { padding: 16px; }
+  .hw, .branches { grid-template-columns: 1fr; }
+  .map { position: static; }
+
+  .book { grid-template-columns: 1fr; }
+  .steps { padding: 10px 12px; gap: 4px; }
+  .steps li { padding: 6px; justify-content: center; }
+  .steps li:not(.is-now) em { display: none; }
+  .steps li.is-now { flex: 3; }
+  .book__step { padding: 14px 16px; }
+  .book__nav { padding: 10px 16px; position: sticky; bottom: 0; background: var(--surface-solid); border-top: 1px solid var(--line); z-index: 3; }
+  .book__sum { border-left: 0; border-top: 1px solid var(--line); order: 3; }
+  .opts { grid-template-columns: 1fr; }
+  .opts--sm { grid-template-columns: 1fr 1fr; }
+  .slots { grid-template-columns: repeat(4, 1fr); max-height: 180px; }
+  .ticket__grid { grid-template-columns: 1fr 1fr; }
+
+  .kpis { grid-template-columns: 1fr 1fr; }
+  .kpi--bars { grid-column: 1 / -1; }
+  .admin__split { grid-template-columns: 1fr; }
+  .detail { border-left: 0; border-top: 1px solid var(--line); }
+  .tablewrap { max-height: 46vh; }
+  .toolbar input[type=search] { min-width: 0; flex: 1 1 100%; max-width: none; }
+
+}
+
+@media (max-width: 400px) {
+  .icons { grid-template-columns: repeat(3, 1fr); }
+  .taskbar__right .mono:not(:last-child) { display: none; }
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+  .desktop { grid-template-columns: 100px 1fr; }
+  .book { grid-template-columns: 1fr 240px; }
+  .kpis { grid-template-columns: repeat(3, 1fr); }
+  .kpi--bars { grid-column: 1 / -1; }
+  .admin__split { grid-template-columns: 1fr 260px; }
+}

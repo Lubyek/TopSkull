@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>TOPSKILL: компьютерный клуб в Челябинске, круглосуточно</title>
+  <meta name="description" content="TOPSKILL — компьютерный клуб в центре Челябинска. Мощные игровые ПК, PS5, Bootcamp для команд, кинозал и VR. Открыто 24/7. Новичкам 2 часа в подарок.">
+  <meta name="theme-color" content="#07050d">
+  <!-- file-redirect: на file:// браузер блокирует ES-модули, поэтому открываем сайт одним файлом -->
+  <script>if (location.protocol === 'file:') location.replace('dist/topskill-standalone.html');</script>
+  <!-- /file-redirect -->
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="TOPSKILL: компьютерный клуб в Челябинске">
+  <meta property="og:description" content="Играй на максимуме. Мощные ПК, PS5, Bootcamp для команд. Круглосуточно.">
+  <meta property="og:image" content="assets/og.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Onest:wght@400;500;600&family=Unbounded:wght@700;800&display=swap">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/desktop.css">
+  <link rel="stylesheet" href="styles/apps.css">
+  <link rel="stylesheet" href="styles/booking.css">
+  <link rel="stylesheet" href="styles/classic.css">
+  <link rel="stylesheet" href="styles/mobile.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "TOPSKILL",
+    "description": "Компьютерный клуб в Челябинске: игровые ПК, PS5, Bootcamp, кинозал, VR.",
+    "telephone": "+7 (908) 082-36-66",
+    "email": "topskill.chelyabinsk@mail.ru",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "ул. Салютная, 10",
+      "addressLocality": "Челябинск",
+      "addressCountry": "RU"
+    },
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      "opens": "00:00",
+      "closes": "23:59"
+    },
+    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "1518" },
+    "sameAs": ["https://vk.com/topskill_chelyabinsk"]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#desktop">К содержимому</a>
+
+  <!-- Загрузочный экран в стиле BIOS -->
+  <div id="boot" class="boot" role="status" aria-live="polite" hidden>
+    <pre id="boot-log" class="boot__log"></pre>
+    <div class="boot__bar" aria-hidden="true"><i id="boot-fill"></i></div>
+    <div class="boot__logo" aria-hidden="true">TOP<b>SKILL</b><span class="cursor">▮</span></div>
+    <button type="button" class="boot__skip" id="boot-skip">Пропустить</button>
+  </div>
+
+  <div id="os" class="os" hidden>
+    <div class="wallpaper" aria-hidden="true">
+      <div class="wallpaper__grad"></div>
+      <div class="wallpaper__grid"></div>
+      <div class="wallpaper__word">ИГРАЙ</div>
+      <svg class="wallpaper__noise" width="100%" height="100%"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#noise)"/></svg>
+    </div>
+
+    <header class="taskbar" id="taskbar">
+      <a class="logo" href="#" id="logo" aria-label="TOPSKILL">TOP<b>SKILL</b><span class="cursor">▮</span></a>
+      <div class="taskbar__clock" id="clock" aria-label="Время в Челябинске">--:--:--</div>
+      <div class="taskbar__right">
+        <span class="status"><i class="dot"></i>Открыто сейчас</span>
+        <span class="mono hide-sm" title="Демо">ping <b id="ping">8</b> ms</span>
+        <span class="mono">мест: <b id="free-seats">--</b></span>
+        <button type="button" class="btn btn--ghost btn--sm" id="mode-toggle">Обычный сайт</button>
+      </div>
+    </header>
+
+    <main id="desktop" class="desktop" tabindex="-1">
+      <h1 class="sr">TOPSKILL: компьютерный клуб в Челябинске, круглосуточно</h1>
+      <nav class="icons" id="icons" aria-label="Приложения"></nav>
+      <div class="windows" id="windows"></div>
+    </main>
+
+    <nav class="dock" id="dock" aria-label="Док"></nav>
+    <button type="button" class="book-fab" id="book-fab" data-open="book">Забронировать</button>
+  </div>
+
+  <!-- Обычный вид: тот же контент из data.js -->
+  <div id="classic" class="classic" hidden></div>
+
+  <!-- Бронь на обычном сайте открывается поверх страницы, без перехода в TopskillOS -->
+  <div id="cl-modal" class="cl-modal" role="dialog" aria-modal="true" aria-labelledby="cl-modal-t" hidden>
+    <div class="cl-modal__box">
+      <header class="cl-modal__bar"><span id="cl-modal-t" class="mono">БРОНЬ МЕСТА</span><button type="button" class="icon-btn" id="cl-modal-x" aria-label="Закрыть бронь">×</button></header>
+      <div class="cl-modal__body" id="cl-modal-body" tabindex="-1"></div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+  <!-- Мини-терминал (клавиша ~) -->
+  <div id="term" class="term" role="dialog" aria-label="Терминал" hidden>
+    <div class="term__bar"><span class="mono">topskill@club:~</span><button type="button" class="icon-btn" id="term-close" aria-label="Закрыть терминал">×</button></div>
+    <div class="term__out" id="term-out" aria-live="polite"></div>
+    <label class="term__line"><span class="mono">&gt;</span><input id="term-in" type="text" autocomplete="off" spellcheck="false" aria-label="Команда"></label>
+  </div>
+
+  <div id="demo-banner" class="demo-banner" hidden>
+    <span>ДЕМО-ВЕРСИЯ: заявки не отправляются, данные хранятся только в вашем браузере</span>
+    <button type="button" class="icon-btn" id="demo-close" aria-label="Закрыть уведомление">×</button>
+  </div>
+
+  <noscript><p style="padding:24px;color:#fff;background:#07050d">TOPSKILL — компьютерный клуб в Челябинске, 24/7. Салютная, 10, тел. +7 (908) 082-36-66. Для работы демо нужен JavaScript.</p></noscript>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
