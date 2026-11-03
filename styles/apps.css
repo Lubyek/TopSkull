@@ -24,10 +24,11 @@
 .tabs { display: flex; flex-wrap: wrap; gap: 4px; }
 .tab { min-height: 36px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: transparent; color: var(--muted); font: 600 13px var(--font-body); }
 .tab[aria-selected='true'] { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
-.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; }
-.seg--wrap { flex-wrap: wrap; border-radius: 10px; }
-.seg__b { min-height: 36px; padding: 0 12px; background: transparent; border: 0; color: var(--muted); font: 600 12px var(--font-body); }
-.seg__b[aria-pressed='true'] { background: var(--text); color: #07050d; }
+/* Переключатель: капсула, активный вариант в цвете акцента, как у вкладок. */
+.seg { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line-2); border-radius: 999px; background: rgba(255, 255, 255, 0.04); }
+.seg--wrap { flex-wrap: wrap; border-radius: 18px; }
+.seg__b { min-height: 34px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: 600 13px var(--font-body); transition: background 0.2s, color 0.2s, box-shadow 0.2s; }
+.seg__b[aria-pressed='true'] { background: var(--accent); color: var(--accent-ink); box-shadow: 0 2px 14px rgba(157, 92, 255, 0.45); }
 
 /* ---------- главная ---------- */
 .stats { list-style: none; display: flex; flex-wrap: wrap; gap: 12px; padding: 0; margin: 0 0 20px; }
@@ -236,6 +237,12 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   .branches .map { order: 1; }
   .branches .branch-list { order: 2; }
   .branches > p { order: 3; }
+  /* Выбор филиала в ленте над картой, ниже только его карточка. */
+  .branch-list .branch:not(.is-on) { display: none; }
+  .branches .map__bar { display: none; }
+  /* Тарифы: переключатель дня на всю ширину под зонами. */
+  .tariffs .seg { display: flex; width: 100%; }
+  .tariffs .seg__b { flex: 1; min-height: 40px; }
   .map__live iframe { aspect-ratio: auto; height: 240px; min-height: 0; }
 }
 

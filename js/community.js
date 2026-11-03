@@ -132,7 +132,7 @@ export const promo = {
 
 // ---------- Филиалы (с картой 2ГИС) ----------
 const gisFirm = (b) => `https://2gis.ru/chelyabinsk/firm/${b.gis.id}`;
-const gisRoute = (b) => `https://2gis.ru/chelyabinsk/routeSearch/rsType/car/to/${b.gis.lon},${b.gis.lat}`;
+export const gisRoute = (b) => `https://2gis.ru/chelyabinsk/routeSearch/rsType/car/to/${b.gis.lon},${b.gis.lat}`;
 /** Карта OpenStreetMap со меткой филиала (встраиваемая, без ключей). 2ГИС остаётся в ссылках «Открыть» и «Маршрут». */
 const osmEmbed = (b) => {
   const { lat, lon } = b.gis;
@@ -178,12 +178,19 @@ export const branches = {
       <p class="mono muted small">${esc(CLUB.email)} · <a href="${esc(CLUB.vk)}" target="_blank" rel="noopener">ВКонтакте</a> · <a href="${esc(CLUB.telegram)}" target="_blank" rel="noopener">Telegram</a> · ${CLUB.hours}</p>
     </div>`,
   mount(root) {
-    const frame = $('#map-frame', root);
+    let frame = $('#map-frame', root);
     const cap = $('#map-cap', root);
     const gis = $('#map-gis', root);
     const show = (b) => {
       const url = osmEmbed(b);
-      if (frame.dataset.src !== url) { frame.dataset.src = url; frame.src = url; }
+      if (frame.dataset.src !== url) {
+        // Новый iframe вместо смены src: переход внутри iframe добавляет запись в историю, и «назад» откатывала бы карту, а не закрывала приложение.
+        const next = frame.cloneNode(false);
+        next.dataset.src = url;
+        next.src = url;
+        frame.replaceWith(next);
+        frame = next;
+      }
       cap.textContent = b.address;
       gis.href = gisFirm(b);
       $$('.branch', root).forEach((p) => p.classList.toggle('is-on', p.dataset.b === b.id));

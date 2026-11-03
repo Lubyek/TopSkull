@@ -11,6 +11,7 @@ import { mountBooking } from './booking.js';
 import { mountAdmin } from './admin.js';
 import { initTerminal } from './terminal.js';
 import { renderClassic } from './classic.js';
+import { initQuickAccess, closeQuickNow } from './quick.js';
 import { icon } from './icons.js';
 import { $, $$, esc, toast, beep, prefersReducedMotion, isMobile } from './util.js';
 
@@ -233,6 +234,7 @@ function setMode(mode, persist = false) {
   if (classic) {
     // Уходя на сайт, закрываем приложения и слои истории, чтобы «назад» не листала невидимые экраны.
     closeModalNow();
+    closeQuickNow();
     closeAllWindows();
     resetLayers();
     renderClassic(classicEl);
@@ -307,6 +309,7 @@ function runBoot() {
 }
 
 // ---------- запуск ----------
+initQuickAccess();
 drawIcons();
 drawDock();
 tick();

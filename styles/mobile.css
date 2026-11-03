@@ -155,3 +155,53 @@
   .kpi--bars { grid-column: 1 / -1; }
   .admin__split { grid-template-columns: 1fr 260px; }
 }
+
+/* ---------- Быстрый доступ (шторка) ---------- */
+.qa-handle { display: none; }
+.qa { position: absolute; inset: 0; z-index: 120; }
+.qa__scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.28s; }
+.qa.is-open .qa__scrim { opacity: 1; }
+.qa__sheet {
+  position: absolute; left: 0; right: 0; bottom: var(--banner-h); max-height: 82%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none;
+  padding: 0 16px calc(18px + env(safe-area-inset-bottom, 0px)); border-radius: 26px 26px 0 0; border-top: 1px solid var(--line-2); background: var(--surface-solid);
+  transform: translateY(100%); transition: transform 0.3s var(--ease);
+}
+.qa__sheet::-webkit-scrollbar { display: none; }
+.qa.is-open .qa__sheet { transform: none; }
+.qa__top { position: sticky; top: 0; z-index: 1; margin: 0 -16px; padding: 0 16px 10px; background: var(--surface-solid); touch-action: none; cursor: grab; }
+.qa__grab { display: grid; place-items: center; height: 28px; }
+.qa__grab i { width: 40px; height: 5px; border-radius: 3px; background: var(--line-2); }
+.qa__head { display: flex; flex-direction: column; gap: 2px; }
+.qa__head b { font: 700 18px var(--font-body); }
+.qa__head .mono { font-size: 12px; }
+.qa__tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 6px 0 14px; }
+.qa__tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 84px; padding: 8px 2px;
+  border: 1px solid var(--line-2); border-radius: 18px; background: var(--surface-2); color: var(--text); text-decoration: none; font: 600 12px/1.2 var(--font-body); text-align: center;
+}
+.qa__tile svg { color: var(--accent); stroke-width: 1.7; }
+.qa__tile:active { transform: scale(0.95); background: rgba(157, 92, 255, 0.25); }
+.qa__tile--main { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.qa__tile--main svg { color: var(--accent-ink); }
+.qa__branches { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.qa__branches li { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255, 255, 255, 0.03); }
+.qa__branches li > div { flex: 1 1 120px; display: flex; flex-direction: column; min-width: 0; }
+.qa__branches .btn--sm { min-height: 44px; text-decoration: none; }
+
+@media (max-width: 760px), (max-height: 500px) and (pointer: coarse) {
+  /* Полоска «домой» над нижней панелью: за неё тянут вверх. */
+  .qa-handle {
+    position: absolute; z-index: 41; left: 0; right: 0; bottom: calc(var(--dock-h) + var(--banner-h) + env(safe-area-inset-bottom, 0px)); display: grid; place-items: center;
+    height: 26px; padding: 0; border: 0; background: none; touch-action: none; cursor: pointer;
+  }
+  .qa-handle i { width: 44px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.35); }
+  .desktop { padding-bottom: 32px; }
+  .dock { touch-action: none; }
+
+  /* Плавнее на слабых телефонах: без размытия фона, без шума и анимации обоев. */
+  .win, .taskbar, .dock { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .taskbar { background: rgba(8, 5, 14, 0.97); }
+  .dock { background: rgba(12, 7, 22, 0.98); }
+  .wallpaper__noise { display: none; }
+  .wallpaper__grad { animation: none; }
+}

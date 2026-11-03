@@ -214,7 +214,7 @@
 }
 
 /* ---------- Телефон: быстрая навигация, закреплённая панель брони, меньше воздуха ---------- */
-.cl-chips, .cl-bar { display: none; }
+.cl-chips, .cl-bar, .hero__hint { display: none; }
 @media (max-width: 760px) {
   .cl-nav { height: 56px; padding-block: 0; }
   .cl-menu { display: none; } /* меню заменила лента чипов под шапкой */
@@ -235,6 +235,20 @@
   }
   .cl-chip.is-on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
   .cl-chip:active { transform: scale(0.96); }
+
+  /* Без размытия фона под закреплёнными панелями: прокрутка плавнее. */
+  .cl-nav, .cl-nav.is-scrolled, .cl-chips, .cl-bar { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .cl-nav, .cl-nav.is-scrolled { background: rgba(8, 5, 14, 0.97); }
+  .cl-chips, .cl-bar { background: rgba(8, 5, 14, 0.98); }
+
+  /* Первый экран: зоны листаются свайпом, кнопки превращаются в точки. */
+  .hero { touch-action: pan-y; }
+  .hero__hint { display: block; margin: 14px 0 0; color: rgba(255, 255, 255, 0.55); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .hero__tabs { justify-content: center; gap: 0; margin-top: 4px; }
+  .hero__tab { position: relative; width: 44px; height: 44px; min-height: 0; padding: 0; border: 0; background: none; font-size: 0; }
+  .hero__tab::before { content: ''; position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 5px; background: rgba(255, 255, 255, 0.4); transition: width 0.25s var(--ease), margin 0.25s var(--ease), background 0.25s; }
+  .hero__tab[aria-selected='true'] { background: none; }
+  .hero__tab[aria-selected='true']::before { width: 28px; margin-left: -14px; background: var(--acc); }
 
   .cl-sec { scroll-margin-top: 112px; padding-top: 36px; }
   .cl-h2 { margin-bottom: 16px; }

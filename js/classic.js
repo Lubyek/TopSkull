@@ -47,6 +47,7 @@ function heroHtml() {
           <p class="hero__text" id="hero-text"></p>
           <p class="hero__price" id="hero-price"></p>
         </div>
+        <p class="hero__hint mono" aria-hidden="true">листайте, чтобы сменить зону</p>
         <div class="hero__tabs" role="tablist" aria-label="Зоны клуба">
           ${SLIDES.map((s, i) => `<button type="button" role="tab" class="hero__tab" id="hero-tab-${i}" data-go="${i}" aria-selected="${i === 0}" aria-controls="hero-shot-${i}" tabindex="${i === 0 ? 0 : -1}">${esc(s.name)}</button>`).join('')}
         </div>
@@ -102,6 +103,23 @@ function setupHero(root) {
     });
   });
   show(0);
+
+  // Телефон: зоны листаются свайпом по первому экрану (вертикальная прокрутка страницы остаётся).
+  let tx = 0;
+  let ty = 0;
+  let tracking = false;
+  hero.addEventListener('touchstart', (e) => {
+    tracking = e.touches.length === 1;
+    if (tracking) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }
+  }, { passive: true });
+  hero.addEventListener('touchend', (e) => {
+    if (!tracking) return;
+    tracking = false;
+    const dx = e.changedTouches[0].clientX - tx;
+    const dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
+    show((current + (dx < 0 ? 1 : -1) + SLIDES.length) % SLIDES.length);
+  }, { passive: true });
 
   // Фото наклоняется к курсору, свет за ним следует за указателем (только с мышью).
   if (!prefersReducedMotion() && window.matchMedia('(hover: hover)').matches) {

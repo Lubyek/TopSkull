@@ -163,6 +163,7 @@ function swipeAway(id) {
   const w = wins.get(id);
   if (!w || w.closing) return;
   if (prefersReducedMotion()) { closeWindow(id); return; }
+  w.skipAnim = true; // окно уже уехало вниз, анимацию закрытия не повторяем
   w.el.style.transition = 'transform 0.2s var(--ease), opacity 0.2s';
   w.el.style.transform = 'translateY(100%)';
   w.el.style.opacity = '0';
@@ -206,7 +207,7 @@ function closeNow(id, instant = false) {
     notify();
     if (w.opener && document.contains(w.opener)) w.opener.focus?.({ preventScroll: true });
   };
-  if (instant || prefersReducedMotion()) { done(); return; }
+  if (instant || w.skipAnim || prefersReducedMotion()) { done(); return; }
   w.el.classList.add('is-closing');
   setTimeout(done, 170);
 }
