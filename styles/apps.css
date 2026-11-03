@@ -214,7 +214,6 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 
 /* ---------- Телефон: общие правки для приложений и обычного сайта ---------- */
 .pr-prizes > summary { display: none; }
-.map__show { display: none; }
 @media (max-width: 760px) {
   /* Акции: большое число не вылезает, дни недели получают место. */
   .pr-new, .pr-cash { padding: 18px; gap: 16px; }
@@ -232,13 +231,12 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   .pr-prizes > summary::after { content: '+'; font: 400 22px var(--font-body); color: var(--accent); }
   .pr-prizes[open] > summary::after { content: '−'; }
   .pr-legend { grid-template-columns: 1fr 1fr; gap: 8px; }
-  /* Филиалы: сначала список, карта по кнопке. */
+  /* Филиалы: карта сверху невысокой полосой, ниже список. */
   .branches { display: flex; flex-direction: column; }
-  .branches .map { order: 2; }
-  .branches .branch-list { order: 1; }
+  .branches .map { order: 1; }
+  .branches .branch-list { order: 2; }
   .branches > p { order: 3; }
-  .map__show { display: inline-flex; width: 100%; border: 0; border-radius: 0; min-height: 52px; }
-  .map__live iframe { min-height: 300px; }
+  .map__live iframe { aspect-ratio: auto; height: 240px; min-height: 0; }
 }
 
 /* ---------- Телефон: компактнее и меньше текста (приложения и обычный сайт) ---------- */
@@ -270,3 +268,9 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   .chat__list:not(.is-all) .msg:nth-child(n + 4) { display: none; }
   .chat__more { display: flex; width: calc(100% - 32px); margin: 8px 16px 12px; }
 }
+
+/* Переключатель филиала над картой. */
+.map__tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; padding: 8px; border-bottom: 1px solid var(--line); }
+.map__tabs::-webkit-scrollbar { display: none; }
+.map__tabs .tab { flex: none; font-size: 12px; }
+.map__tabs .tab[aria-pressed='true'] { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }

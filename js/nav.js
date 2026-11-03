@@ -46,7 +46,7 @@ export function dropLayer(layer) {
   if (i >= 0) layers.splice(i, 1);
 }
 
-/** Забыть все слои (например, при переходе на обычный сайт), вернув историю на место. */
+/** Забыть все слои (при переходе на обычный сайт или сворачивании на главный экран), вернув историю на место. Окна не закрываются. */
 export function resetLayers() {
   const n = layers.length - pendingPush;
   layers.length = 0;

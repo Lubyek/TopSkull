@@ -133,23 +133,28 @@ export const promo = {
 // ---------- Филиалы (с картой 2ГИС) ----------
 const gisFirm = (b) => `https://2gis.ru/chelyabinsk/firm/${b.gis.id}`;
 const gisRoute = (b) => `https://2gis.ru/chelyabinsk/routeSearch/rsType/car/to/${b.gis.lon},${b.gis.lat}`;
-/** Виджет карты 2ГИС: центр и метка на выбранном филиале. */
-const gisWidget = (b) => `https://widgets.2gis.com/widget?type=firmsonmap&options=${encodeURIComponent(JSON.stringify({
-  pos: { lat: b.gis.lat, lon: b.gis.lon, zoom: 16 }, opt: { city: 'chelyabinsk' }, org: b.gis.id,
-}))}`;
+/** Карта OpenStreetMap со меткой филиала (встраиваемая, без ключей). 2ГИС остаётся в ссылках «Открыть» и «Маршрут». */
+const osmEmbed = (b) => {
+  const { lat, lon } = b.gis;
+  const dx = 0.0055;
+  const dy = 0.0032;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${(lon - dx).toFixed(5)},${(lat - dy).toFixed(5)},${(lon + dx).toFixed(5)},${(lat + dy).toFixed(5)}&layer=mapnik&marker=${lat},${lon}`;
+};
 const rateText = (n) => String(n).replace('.', ',');
 
 export const branches = {
   render: () => `
     <div class="pad branches">
       <figure class="map">
+        <div class="map__tabs" role="group" aria-label="Филиал на карте">
+          ${BRANCHES.map((b, i) => `<button type="button" class="tab" data-pick="${b.id}" aria-pressed="${i === 0}">0${i + 1} ${esc(b.name)}</button>`).join('')}
+        </div>
         <div class="map__live" id="map-live">
-          <button type="button" class="btn btn--ghost map__show" id="map-show">Показать карту</button>
-          <iframe id="map-frame" title="Карта филиалов в 2ГИС" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+          <iframe id="map-frame" title="Карта: расположение филиала" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
         </div>
         <figcaption class="map__bar">
           <span class="mono muted small" id="map-cap"></span>
-          <a class="btn btn--accent btn--sm" href="${CLUB.gis.url}" target="_blank" rel="noopener noreferrer">Открыть в 2ГИС</a>
+          <a class="btn btn--accent btn--sm" id="map-gis" href="${CLUB.gis.url}" target="_blank" rel="noopener noreferrer">Открыть в 2ГИС</a>
         </figcaption>
       </figure>
       <ul class="branch-list">
@@ -175,28 +180,23 @@ export const branches = {
   mount(root) {
     const frame = $('#map-frame', root);
     const cap = $('#map-cap', root);
-    let current = BRANCHES[0];
-    const phone = window.matchMedia('(max-width: 760px)').matches;
-    // На телефоне карта грузится по нажатию: она тяжёлая, а список филиалов и маршрут уже есть ниже.
-    const showBtn = $('#map-show', root);
-    const setMapVisible = (on) => { frame.hidden = !on; showBtn.hidden = on; if (on) load2gis(current); };
-    const load2gis = (b) => {
-      const url = gisWidget(b);
-      if (frame.dataset.src !== url) { frame.dataset.src = url; frame.src = url; }
-    };
-    showBtn.addEventListener('click', () => setMapVisible(true));
+    const gis = $('#map-gis', root);
     const show = (b) => {
-      current = b;
-      if (!frame.hidden) load2gis(b);
+      const url = osmEmbed(b);
+      if (frame.dataset.src !== url) { frame.dataset.src = url; frame.src = url; }
       cap.textContent = b.address;
+      gis.href = gisFirm(b);
       $$('.branch', root).forEach((p) => p.classList.toggle('is-on', p.dataset.b === b.id));
+      $$('[data-pick]', root).forEach((t) => t.setAttribute('aria-pressed', String(t.dataset.pick === b.id)));
     };
+    const byId = (id) => BRANCHES.find((x) => x.id === id);
+    $$('[data-pick]', root).forEach((t) => t.addEventListener('click', () => show(byId(t.dataset.pick))));
     $$('.branch', root).forEach((p) => {
-      const pick = () => show(BRANCHES.find((x) => x.id === p.dataset.b));
+      const pick = () => show(byId(p.dataset.b));
       p.addEventListener('mouseenter', pick);
       p.addEventListener('focusin', pick);
+      p.addEventListener('click', (e) => { if (!e.target.closest('a, button')) pick(); }); // на телефоне нажатие по карточке
     });
-    setMapVisible(!phone);
     show(BRANCHES[0]);
   },
 };

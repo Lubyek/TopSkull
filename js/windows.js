@@ -3,7 +3,7 @@
 // системная «назад» и свайп вниз по заголовку возвращают на главный экран.
 import { APPS } from './data.js';
 import { icon } from './icons.js';
-import { pushLayer, closeLayer, dropLayer } from './nav.js';
+import { pushLayer, closeLayer, dropLayer, resetLayers } from './nav.js';
 import { esc, isMobile, prefersReducedMotion } from './util.js';
 
 const registry = new Map(); // id → render(body, ctx) → необязательная функция очистки
@@ -95,6 +95,7 @@ export function openApp(id, opts = {}) {
   let existing = wins.get(id);
   if (existing?.closing) { closeNow(id, true); existing = null; } // окно ещё закрывается: открываем заново
   if (existing) {
+    if (isMobile() && !existing.layer) attachLayer(id, existing); // свёрнутое приложение снова стало слоем истории
     focusWindow(id);
     existing.el.querySelector('.win__body')?.focus({ preventScroll: true });
     return existing.el;
@@ -147,11 +148,43 @@ export function openApp(id, opts = {}) {
   const entry = { el, cleanup, opener: document.activeElement, ctx, layer: null, closing: false };
   wins.set(id, entry);
   // На телефоне приложение — слой истории: системная «назад» закрывает его (или шаг внутри него).
-  if (mobile) entry.layer = pushLayer({ close: () => closeNow(id), back: () => !!ctx.onBack?.() });
+  if (mobile) attachLayer(id, entry);
   wire(el, id);
   focusWindow(id);
   body.focus({ preventScroll: true });
   return el;
+}
+
+function attachLayer(id, entry) {
+  entry.layer = pushLayer({ close: () => closeNow(id), back: () => !!entry.ctx.onBack?.() });
+}
+
+/**
+ * Телефон: «домой». Все приложения уходят в фон вместе с состоянием (шаги брони, введённый текст),
+ * значки на главном экране показывают, что они запущены. Системная «назад» на главном экране уже ничего не закрывает.
+ */
+export function goHome() {
+  resetLayers();
+  wins.forEach((w) => {
+    w.layer = null;
+    w.el.style.transition = '';
+    w.el.style.transform = '';
+    w.el.style.opacity = '';
+    w.el.classList.add('is-min');
+    w.el.classList.remove('is-active');
+  });
+  notify();
+}
+
+/** Свайп вниз: приложение уезжает вниз и сворачивается. */
+function swipeAway(id) {
+  const w = wins.get(id);
+  if (!w || w.closing) return;
+  if (prefersReducedMotion()) { goHome(); return; }
+  w.el.style.transition = 'transform 0.22s var(--ease), opacity 0.22s';
+  w.el.style.transform = 'translateY(100%)';
+  w.el.style.opacity = '0';
+  setTimeout(goHome, 230);
 }
 
 export function closeWindow(id) {
@@ -242,6 +275,7 @@ function wire(el, id) {
     if (act === 'close') closeWindow(id);
   });
   el.querySelector('.win__back').addEventListener('click', () => goBack(id));
+  enablePullDown(el, id);
   const bar = el.querySelector('.win__bar');
   bar.addEventListener('dblclick', (e) => { if (!e.target.closest('button') && !isMobile()) toggleMax(el); });
   enableDrag(el, bar, id);
@@ -277,6 +311,39 @@ function moveBy(el, dx, dy) {
   el.style.top = `${y}px`;
 }
 
+/** Телефон: потянуть вниз за верх содержимого (когда оно прокручено до начала) тоже сворачивает приложение. */
+function enablePullDown(el, id) {
+  const body = el.querySelector('.win__body');
+  let t = null;
+  body.addEventListener('touchstart', (e) => {
+    t = isMobile() && e.touches.length === 1 && body.scrollTop <= 0 ? { x: e.touches[0].clientX, y: e.touches[0].clientY, on: false, dy: 0 } : null;
+  }, { passive: true });
+  body.addEventListener('touchmove', (e) => {
+    if (!t) return;
+    const dx = e.touches[0].clientX - t.x;
+    const dy = e.touches[0].clientY - t.y;
+    if (!t.on) {
+      if (Math.abs(dx) > 14 || dy < -6 || body.scrollTop > 0) { t = null; return; } // горизонтальный жест или прокрутка вверх
+      if (dy < 14 || Math.abs(dx) > dy * 0.7) return; // ещё не ясно, вертикальный ли жест
+      t.on = true;
+    }
+    t.dy = Math.max(0, dy - 14);
+    el.style.transform = `translateY(${t.dy}px)`;
+    el.style.opacity = String(1 - Math.min(0.6, t.dy / 400));
+  }, { passive: true });
+  const end = () => {
+    if (!t) return;
+    const { on, dy } = t;
+    t = null;
+    if (!on) return;
+    if (dy > 110) { swipeAway(id); return; }
+    el.style.transform = '';
+    el.style.opacity = '';
+  };
+  body.addEventListener('touchend', end, { passive: true });
+  body.addEventListener('touchcancel', end, { passive: true });
+}
+
 function enableDrag(el, bar, id) {
   let sx = 0; let sy = 0; let ox = 0; let oy = 0; let dragging = false; let swipe = 0;
   bar.addEventListener('pointerdown', (e) => {
@@ -288,7 +355,7 @@ function enableDrag(el, bar, id) {
   bar.addEventListener('pointermove', (e) => {
     if (!dragging) return;
     if (isMobile()) {
-      // Свайп вниз по заголовку закрывает «приложение».
+      // Свайп вниз по заголовку сворачивает приложение.
       swipe = Math.max(0, e.clientY - sy);
       el.style.transform = `translateY(${swipe}px)`;
       el.style.opacity = String(1 - Math.min(0.6, swipe / 400));
@@ -303,7 +370,7 @@ function enableDrag(el, bar, id) {
     if (!dragging) return;
     dragging = false;
     if (isMobile()) {
-      if (swipe > 90) { closeWindow(id); return; }
+      if (swipe > 90) { swipeAway(id); return; }
       el.style.transform = '';
       el.style.opacity = '';
     }

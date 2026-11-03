@@ -217,6 +217,9 @@
 .cl-chips, .cl-bar { display: none; }
 @media (max-width: 760px) {
   .cl-nav { height: 56px; padding-block: 0; }
+  .cl-menu { display: none; } /* меню заменила лента чипов под шапкой */
+  .cl-nav { grid-template-columns: 1fr auto; }
+  .cl-logo { justify-self: start; }
   .cl-nav.is-scrolled { padding-block: 0; }
   .cl-nav__r [data-open='book'], .cl-foot [data-open='book'] { display: none; } /* кнопка брони теперь в нижней панели */
 
