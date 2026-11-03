@@ -1,7 +1,9 @@
 // Менеджер окон: открытие «из иконки», фокус, перетаскивание, сворачивание, развёртывание, закрытие.
-// На телефоне окна — полноэкранные «приложения», перетаскивания нет, закрывает свайп вниз.
+// На телефоне окна — полноэкранные «приложения» мобильной ОС: открыто одно, сверху кнопка «назад»,
+// системная «назад» и свайп вниз по заголовку возвращают на главный экран.
 import { APPS } from './data.js';
 import { icon } from './icons.js';
+import { pushLayer, closeLayer, dropLayer } from './nav.js';
 import { esc, isMobile, prefersReducedMotion } from './util.js';
 
 const registry = new Map(); // id → render(body, ctx) → необязательная функция очистки
@@ -43,7 +45,8 @@ export function focusWindow(id) {
   const wasMin = w.el.classList.contains('is-min');
   w.el.classList.remove('is-min');
   w.el.style.zIndex = String(++z);
-  wins.forEach((x, k) => x.el.classList.toggle('is-active', k === id));
+  // На телефоне видно только одно приложение, остальные ждут «под ним».
+  wins.forEach((x, k) => { x.el.classList.toggle('is-active', k === id); x.el.classList.toggle('is-bg', k !== id && isMobile()); });
   notify();
   if (wasMin) genie(w.el, id, false); // окно «вылетает» из дока
 }
@@ -89,7 +92,8 @@ function genie(el, id, toDock, done) {
 export function openApp(id, opts = {}) {
   const meta = appMeta(id);
   if (!meta || !registry.has(id)) return null;
-  const existing = wins.get(id);
+  let existing = wins.get(id);
+  if (existing?.closing) { closeNow(id, true); existing = null; } // окно ещё закрывается: открываем заново
   if (existing) {
     focusWindow(id);
     existing.el.querySelector('.win__body')?.focus({ preventScroll: true });
@@ -124,7 +128,9 @@ export function openApp(id, opts = {}) {
 
   el.innerHTML = `
     <header class="win__bar" tabindex="0" aria-label="Заголовок окна ${esc(meta.title)}. Стрелки двигают окно, Esc закрывает">
-      <span class="win__title">${esc(meta.file)}</span>
+      <button type="button" class="win__back icon-btn" data-act="back" aria-label="Назад">${icon('back', 22)}</button>
+      <span class="win__title"><span class="win__file">${esc(meta.file)}</span><span class="win__name">${esc(meta.title)}</span></span>
+      ${id === 'book' ? '' : `<button type="button" class="win__book" data-open="book">Забронировать</button>`}
       <span class="win__ctl">
         <button type="button" class="icon-btn" data-act="min" aria-label="Свернуть">${icon('min', 16)}</button>
         <button type="button" class="icon-btn hide-sm" data-act="max" aria-label="Развернуть на весь экран">${icon('max', 16)}</button>
@@ -138,7 +144,10 @@ export function openApp(id, opts = {}) {
   const body = el.querySelector('.win__body');
   const ctx = { id, el, body, open: openApp, close: () => closeWindow(id), opts };
   const cleanup = registry.get(id)(body, ctx);
-  wins.set(id, { el, cleanup, opener: document.activeElement });
+  const entry = { el, cleanup, opener: document.activeElement, ctx, layer: null, closing: false };
+  wins.set(id, entry);
+  // На телефоне приложение — слой истории: системная «назад» закрывает его (или шаг внутри него).
+  if (mobile) entry.layer = pushLayer({ close: () => closeNow(id), back: () => !!ctx.onBack?.() });
   wire(el, id);
   focusWindow(id);
   body.focus({ preventScroll: true });
@@ -147,18 +156,42 @@ export function openApp(id, opts = {}) {
 
 export function closeWindow(id) {
   const w = wins.get(id);
-  if (!w) return;
+  if (!w || w.closing) return;
+  if (w.layer) { closeLayer(w.layer); return; } // слой сам вызовет closeNow
+  closeNow(id);
+}
+
+/** «Назад» в приложении: сначала шаг внутри него (например, шаг брони), иначе закрыть. */
+function goBack(id) {
+  const w = wins.get(id);
+  if (!w || w.closing) return;
+  if (w.ctx.onBack?.()) return;
+  closeWindow(id);
+}
+
+/** Закрыть все приложения сразу (при переходе на обычный сайт). */
+export function closeAllWindows() {
+  [...wins.keys()].forEach((id) => closeNow(id, true));
+}
+
+function closeNow(id, instant = false) {
+  const w = wins.get(id);
+  if (!w || (w.closing && !instant)) return;
+  w.closing = true;
+  if (w.layer) { dropLayer(w.layer); w.layer = null; }
   const done = () => {
+    if (w.finished) return; // окно уже убрано (например, досрочно при повторном открытии)
+    w.finished = true;
     try { w.cleanup?.(); } catch { /* окно закрывается в любом случае */ }
     w.el.remove();
-    wins.delete(id);
+    if (wins.get(id) === w) wins.delete(id);
     syncMax();
     const next = activeId();
     if (next) focusWindow(next);
     notify();
     if (w.opener && document.contains(w.opener)) w.opener.focus?.({ preventScroll: true });
   };
-  if (prefersReducedMotion()) { done(); return; }
+  if (instant || prefersReducedMotion()) { done(); return; }
   w.el.classList.add('is-closing');
   setTimeout(done, 170);
 }
@@ -208,6 +241,7 @@ function wire(el, id) {
     if (act === 'max') toggleMax(el);
     if (act === 'close') closeWindow(id);
   });
+  el.querySelector('.win__back').addEventListener('click', () => goBack(id));
   const bar = el.querySelector('.win__bar');
   bar.addEventListener('dblclick', (e) => { if (!e.target.closest('button') && !isMobile()) toggleMax(el); });
   enableDrag(el, bar, id);

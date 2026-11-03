@@ -1,9 +1,10 @@
 // Точка входа: загрузка, рабочий стол, панель задач, док, режимы и пасхалки.
-import { APPS } from './data.js';
-import { wallNow } from './pricing.js';
+import { APPS, BRANCHES } from './data.js';
+import { wallNow, money, packPrice } from './pricing.js';
 import { freeNow } from './availability.js';
 import { onStoreEvent, load, save } from './store.js';
-import { registerApp, openApp, onWindowsChange, isOpen, cycleWindows } from './windows.js';
+import { registerApp, openApp, onWindowsChange, isOpen, cycleWindows, closeAllWindows } from './windows.js';
+import { pushLayer, closeLayer, resetLayers } from './nav.js';
 import * as S from './sections.js';
 import * as C from './community.js';
 import { mountBooking } from './booking.js';
@@ -11,7 +12,7 @@ import { mountAdmin } from './admin.js';
 import { initTerminal } from './terminal.js';
 import { renderClassic } from './classic.js';
 import { icon } from './icons.js';
-import { $, $$, esc, toast, beep, prefersReducedMotion, isMobile } from './util.js';
+import { $, $$, esc, toast, beep, prefersReducedMotion, isMobile, telHref, plural } from './util.js';
 
 const root = document.documentElement;
 const osEl = $('#os');
@@ -35,9 +36,25 @@ function drawIcons() {
   $('#icons').innerHTML = APPS.map((a) => `
     <button type="button" class="icon" data-open="${a.id}" data-app-btn="${a.id}" aria-label="${esc(a.title)}. Alt и стрелки перемещают значок">
       <span class="icon__img">${icon(a.icon)}</span><span>${esc(a.title)}</span>
-    </button>`).join('');
+    </button>`).join('') + `
+    <button type="button" class="icon icon--site" data-mode="classic" aria-label="Обычный сайт">
+      <span class="icon__img">${icon('globe')}</span><span>Сайт</span>
+    </button>`;
   layoutIcons();
   enableIconDrag();
+}
+
+// ---------- главный экран телефона: виджет с главным действием ----------
+function drawWidget() {
+  const b = BRANCHES[0];
+  $('#m-widget').innerHTML = `
+    <div class="m-widget__top"><span class="logo">TOP<b>SKILL</b></span><span class="mono muted">Челябинск · 24/7</span></div>
+    <p class="m-widget__free"><b id="m-free">--</b><span id="m-free-lbl">мест свободно сейчас</span></p>
+    <p class="m-widget__sub">от ${money(packPrice('hall', 'h1', false))} за час. Новичкам 2 часа в подарок.</p>
+    <div class="m-widget__row">
+      <button type="button" class="btn btn--accent" data-open="book">Забронировать</button>
+      <a class="btn btn--ghost" href="${telHref(b.phone)}" aria-label="Позвонить в клуб ${esc(b.phone)}">${icon('phone', 18)} Позвонить</a>
+    </div>`;
 }
 
 // ---------- иконки на столе: свободное размещение ----------
@@ -61,7 +78,7 @@ function layoutIcons(reset = false) {
   if (reset) { iconPos = {}; save('icons', iconPos); }
   const mobile = isMobile();
   const area = box.getBoundingClientRect();
-  $$('.icon', box).forEach((el, i) => {
+  $$('.icon:not(.icon--site)', box).forEach((el, i) => {
     if (mobile || !area.width) { el.style.left = ''; el.style.top = ''; return; }
     const p = clampIcon(iconPos[el.dataset.open] || defaultIconPos(i, area.height), area);
     el.style.left = `${p.x}px`;
@@ -134,7 +151,7 @@ function drawDock(state = {}) {
   const base = APPS.filter((a) => a.dock);
   const extra = APPS.filter((a) => !a.dock && state[a.id]);
   const btn = (a) => `<button type="button" class="dock__btn${state[a.id] === 'open' ? ' is-open' : ''}${state[a.id] === 'min' ? ' is-open is-min' : ''}"
-    data-open="${a.id}" data-dock="${a.id}" title="${esc(a.title)}" aria-label="${esc(a.title)}">${icon(a.icon)}</button>`;
+    data-open="${a.id}" data-dock="${a.id}" title="${esc(a.title)}" aria-label="${esc(a.title)}">${icon(a.icon)}<span class="dock__lbl">${esc(a.title)}</span></button>`;
   $('#dock').innerHTML = base.map(btn).join('') + (extra.length ? `<i class="dock__sep"></i>${extra.map(btn).join('')}` : '');
 }
 
@@ -143,18 +160,28 @@ function drawDock(state = {}) {
 const modal = $('#cl-modal');
 const modalBody = $('#cl-modal-body');
 let modalOpener = null;
+let modalLayer = null;
 
-function closeModal() {
+function closeModalNow() {
+  modalLayer = null;
+  if (modal.hidden) return;
   modal.hidden = true;
   modalBody.innerHTML = '';
   modalOpener?.focus?.({ preventScroll: true });
+}
+
+function closeModal() {
+  if (modalLayer) closeLayer(modalLayer); else closeModalNow();
 }
 
 function openBookingModal(opts = {}) {
   modalOpener = opts.from || document.activeElement;
   modalBody.innerHTML = '';
   modal.hidden = false;
-  mountBooking(modalBody, { id: 'book', opts, close: closeModal, open: openSmart });
+  const ctx = { id: 'book', opts, close: closeModal, open: openSmart };
+  mountBooking(modalBody, ctx);
+  // На телефоне бронь — слой истории: системная «назад» возвращает на шаг назад или закрывает бронь.
+  if (isMobile()) modalLayer = pushLayer({ close: closeModalNow, back: () => !!ctx.onBack?.() });
   modalBody.focus({ preventScroll: true });
 }
 
@@ -181,6 +208,8 @@ modal.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('click', (e) => {
+  const m = e.target.closest('[data-mode]');
+  if (m) { setMode(m.dataset.mode, true); return; }
   const t = e.target.closest('[data-open]');
   if (!t) return;
   openSmart(t.dataset.open, { from: t, branch: t.dataset.branch });
@@ -192,23 +221,44 @@ onWindowsChange(drawDock);
 const pad = (n) => String(n).padStart(2, '0');
 function tick() {
   const d = wallNow();
-  $('#clock').textContent = `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+  // На телефоне секунды скрыты стилями: в строке состояния только часы и минуты.
+  $('#clock').innerHTML = `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}<span class="sec">:${pad(d.getUTCSeconds())}</span>`;
 }
-const refreshSeats = () => { $('#free-seats').textContent = freeNow(); };
+const refreshSeats = () => {
+  const n = freeNow();
+  $('#free-seats').textContent = n;
+  $('#m-free').textContent = n;
+  $('#m-free-lbl').textContent = plural(n, ['место свободно сейчас', 'места свободно сейчас', 'мест свободно сейчас']);
+};
 
 // ---------- режимы: ОС / обычный сайт ----------
-function setMode(mode) {
+// Телефон по умолчанию открывает обычный сайт, остальные устройства — TopskillOS.
+// Выбор запоминается только после явного переключения; для телефона и компьютера он свой.
+const modeKey = () => (isMobile() ? 'mode_phone' : 'mode');
+function startMode() {
+  if (location.hash === '#classic') return 'classic';
+  if (location.hash === '#os') return 'os';
+  const saved = load(modeKey(), null);
+  if (saved === 'classic' || saved === 'os') return saved;
+  return isMobile() ? 'classic' : 'os';
+}
+
+function setMode(mode, persist = false) {
   const classic = mode === 'classic';
-  if (classic) renderClassic(classicEl);
+  if (classic) {
+    // Уходя на сайт, закрываем приложения и слои истории, чтобы «назад» не листала невидимые экраны.
+    closeModalNow();
+    closeAllWindows();
+    resetLayers();
+    renderClassic(classicEl);
+  }
   osEl.hidden = classic;
   if (!classic) layoutIcons();
   classicEl.hidden = !classic;
   document.body.style.overflow = classic ? 'auto' : 'hidden';
   $('#book-fab').hidden = classic;
-  save('mode', mode);
-  if (classic) $('#cl-os')?.addEventListener('click', () => setMode('os'), { once: true });
+  if (persist) save(modeKey(), mode);
 }
-$('#mode-toggle').addEventListener('click', () => setMode('classic'));
 
 // ---------- уведомления о новых заявках ----------
 onStoreEvent((ev) => {
@@ -247,9 +297,8 @@ const BOOT_LINES = [
 function finishBoot() {
   $('#boot').hidden = true;
   try { sessionStorage.setItem('topskill_booted', '1'); } catch { /* не страшно */ }
-  const mode = location.hash === '#classic' ? 'classic' : load('mode', 'os');
   osEl.hidden = false;
-  setMode(mode === 'classic' ? 'classic' : 'os');
+  setMode(startMode());
   $('#desktop').focus({ preventScroll: true });
 }
 
@@ -273,6 +322,7 @@ function runBoot() {
 }
 
 // ---------- запуск ----------
+drawWidget();
 drawIcons();
 drawDock();
 tick();
@@ -288,4 +338,5 @@ $('#logo').addEventListener('click', (e) => e.preventDefault());
 
 let booted = false;
 try { booted = sessionStorage.getItem('topskill_booted') === '1'; } catch { /* покажем загрузку */ }
-if (booted || prefersReducedMotion()) finishBoot(); else runBoot();
+// На телефоне BIOS-заставки нет: человек пришёл забронировать место, а не смотреть загрузку.
+if (booted || prefersReducedMotion() || isMobile()) finishBoot(); else runBoot();

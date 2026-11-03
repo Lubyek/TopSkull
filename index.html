@@ -6,6 +6,10 @@
   <title>TOPSKILL: компьютерный клуб в Челябинске, круглосуточно</title>
   <meta name="description" content="TOPSKILL — компьютерный клуб в центре Челябинска. Мощные игровые ПК, PS5, Bootcamp для команд, кинозал и VR. Открыто 24/7. Новичкам 2 часа в подарок.">
   <meta name="theme-color" content="#07050d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TOPSKILL">
   <!-- file-redirect: на file:// браузер блокирует ES-модули, поэтому открываем сайт одним файлом -->
   <script>if (location.protocol === 'file:') location.replace('dist/topskill-standalone.html');</script>
   <!-- /file-redirect -->
@@ -75,15 +79,16 @@
       <a class="logo" href="#" id="logo" aria-label="TOPSKILL">TOP<b>SKILL</b><span class="cursor">▮</span></a>
       <div class="taskbar__clock" id="clock" aria-label="Время в Челябинске">--:--:--</div>
       <div class="taskbar__right">
-        <span class="status"><i class="dot"></i>Открыто сейчас</span>
+        <span class="status"><i class="dot"></i><span class="status__full">Открыто сейчас</span><span class="status__short">24/7</span></span>
         <span class="mono hide-sm" title="Демо">ping <b id="ping">8</b> ms</span>
         <span class="mono">мест: <b id="free-seats">--</b></span>
-        <button type="button" class="btn btn--ghost btn--sm" id="mode-toggle">Обычный сайт</button>
+        <button type="button" class="btn btn--ghost btn--sm" id="mode-toggle" data-mode="classic"><span class="lbl-full">Обычный сайт</span><span class="lbl-short">Сайт</span></button>
       </div>
     </header>
 
     <main id="desktop" class="desktop" tabindex="-1">
       <h1 class="sr">TOPSKILL: компьютерный клуб в Челябинске, круглосуточно</h1>
+      <section class="m-widget" id="m-widget" aria-label="Клуб сейчас"></section>
       <nav class="icons" id="icons" aria-label="Приложения"></nav>
       <div class="windows" id="windows"></div>
     </main>

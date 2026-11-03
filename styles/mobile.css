@@ -1,53 +1,113 @@
-/* Телефон и узкие экраны: окна становятся полноэкранными «приложениями». */
-@media (max-width: 760px) {
-  :root { --dock-h: 64px; }
-  .hide-sm { display: none !important; }
+/* ---------- Мобильная ОС ----------
+   На телефоне (узкий экран или телефон на боку) TopskillOS превращается в мобильную систему:
+   строка состояния, главный экран с виджетом и сеткой приложений, нижняя панель,
+   приложения на весь экран с кнопкой «назад». Условие то же, что PHONE_QUERY в js/util.js. */
 
-  .taskbar { padding: 0 12px; }
-  .taskbar__clock { position: static; transform: none; margin-left: auto; font-size: 12px; }
-  .taskbar__right { gap: 10px; }
-  .taskbar__right .mono { font-size: 11px; }
-  .status { font-size: 11px; }
-  #mode-toggle { display: none; }
+/* Только для телефона: на компьютере этих элементов нет. */
+.m-widget, .icon--site, .dock__lbl, .win__back, .win__book, .win__name, .status__short, .lbl-short { display: none; }
+.cl-panel__os { display: none; }
 
-  /* Рабочий стол = главный экран мобильной ОС: плакат и сетка иконок. */
-  .desktop { z-index: auto; display: block; overflow-y: auto; padding: 14px 16px calc(var(--dock-h) + var(--banner-h) + 84px); }
-    .icons { position: static; pointer-events: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; overflow: visible; }
-  .icon { position: static; width: auto; min-height: 88px; font-size: 11px; cursor: pointer; touch-action: auto; }
-  .win__rs { display: none; }
-  .icon__img { width: 52px; height: 52px; }
+@media (max-width: 760px), (max-height: 500px) and (pointer: coarse) {
+  :root { --taskbar-h: 44px; --dock-h: 62px; --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); }
+  .hide-sm, .win__rs, .win__file, .win__ctl, .taskbar .logo, .taskbar__clock .sec, .lbl-full, .status__full { display: none !important; }
+  .m-widget { display: block; }
+  .icon--site { display: flex; }
+  .dock__lbl { display: block; }
+  .win__back { display: inline-grid; }
+  .win__book { display: inline-flex; align-items: center; }
+  .win__name, .lbl-short, .status__short { display: inline; }
 
+  html, body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+  button, a, [role=button], input, select, label { touch-action: manipulation; }
+  input, select, textarea { font-size: 16px; } /* иначе iOS приближает страницу при вводе */
+
+  /* Строка состояния: часы слева, статус и переход на сайт справа. */
+  .taskbar { height: calc(var(--taskbar-h) + var(--sat)); padding: var(--sat) 14px 0; background: rgba(8, 5, 14, 0.82); }
+  .taskbar__clock { position: static; transform: none; order: -1; font: 700 15px var(--font-mono); letter-spacing: 0.02em; }
+  .taskbar__right { gap: 10px; margin-left: auto; }
+  .taskbar__right .mono, .status { font-size: 12px; }
+  #mode-toggle { min-height: 34px; padding: 0 12px; border-radius: 17px; font-size: 12px; }
+
+  /* Главный экран. */
+  .desktop {
+    z-index: auto; display: block; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+    inset: calc(var(--taskbar-h) + var(--sat)) 0 calc(var(--dock-h) + var(--banner-h) + var(--sab)) 0;
+    padding: 10px 16px 16px;
+  }
+  .m-widget {
+    margin-bottom: 12px; padding: 14px 16px; border: 1px solid var(--line-2); border-radius: 22px;
+    background: linear-gradient(145deg, rgba(74, 29, 150, 0.55), rgba(19, 12, 33, 0.85) 70%);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+  }
+  .m-widget__top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  .m-widget .logo { font-size: 16px; }
+  .m-widget__top .mono { font-size: 11px; }
+  .m-widget__free { display: flex; align-items: baseline; gap: 10px; }
+  .m-widget__free b { font: 800 40px/1 var(--font-head); letter-spacing: -0.05em; color: var(--text); }
+  .m-widget__free span { color: var(--muted); font-size: 14px; }
+  .m-widget__sub { margin: 4px 0 12px; font-size: 13px; color: #d5dae6; }
+  .m-widget__row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; }
+  .m-widget__row .btn { min-height: 50px; padding: 0 12px; font-size: 15px; text-decoration: none; }
+
+  .icons { position: static; pointer-events: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 4px; }
+  .icon { position: static; width: auto; min-height: 86px; padding: 8px 2px; font-size: 12px; line-height: 1.2; cursor: pointer; touch-action: manipulation; }
+  .icon:hover { background: none; border-color: transparent; }
+  .icon:active { transform: scale(0.94); }
+  .icon:active .icon__img { background: var(--accent); color: var(--accent-ink); }
+  .icon__img { width: 60px; height: 60px; border-radius: 16px; }
+  .icon__img svg { width: 28px; height: 28px; }
+  .icon--site .icon__img { color: var(--cyan); }
+
+  /* Нижняя панель: основные приложения с подписями. */
+  .dock {
+    left: 0; right: 0; bottom: var(--banner-h); transform: none; max-width: none; height: calc(var(--dock-h) + var(--sab));
+    align-items: flex-start; justify-content: space-around; gap: 0; padding: 6px 6px var(--sab);
+    border-radius: 0; border-width: 1px 0 0; background: rgba(12, 7, 22, 0.9);
+  }
+  .dock__btn {
+    width: 25%; height: 100%; max-height: 54px; flex-direction: column; gap: 3px; padding: 0; border: 0; border-radius: 12px; background: none;
+    font: 500 11px var(--font-body); color: var(--muted); display: flex; align-items: center; justify-content: center;
+  }
+  .dock__btn svg { width: 24px; height: 24px; }
+  .dock__btn:hover, .dock__btn:focus-visible { transform: none; border-color: transparent; color: var(--text); }
+  .dock__btn:active { background: rgba(255, 255, 255, 0.08); }
+  .dock__btn.is-open { color: var(--accent); }
+  .dock__btn.is-open::after { display: none; }
+  .dock__sep, .dock__btn:nth-child(n + 5) { display: none; }
+  .book-fab { display: none !important; }
+
+  html.has-banner { --banner-h: 44px; }
+  .demo-banner { z-index: 90; font-size: 10px; line-height: 1.3; padding-bottom: var(--sab); }
+  .toasts { left: 10px; right: 10px; top: calc(52px + var(--sat)); }
+  .toast { max-width: none; }
+  .term { top: calc(6% + var(--sat)); }
+
+  /* Приложение: экран поверх главного. */
   .windows { position: static; }
   .win {
-    position: fixed; left: 0 !important; top: 0 !important; width: 100% !important; height: 100dvh !important;
-    z-index: 200 !important; border-radius: 0; border: 0; min-width: 0; min-height: 0;
-    animation: sheet-in 0.26s var(--ease);
-    padding-bottom: env(safe-area-inset-bottom);
+    position: fixed; left: 0 !important; top: 0 !important; width: 100% !important; height: calc(100dvh - var(--banner-h)) !important;
+    z-index: 200 !important; border-radius: 0; border: 0; min-width: 0; min-height: 0; background: var(--surface-solid);
+    animation: app-in 0.28s var(--ease);
   }
-  .win.is-active { box-shadow: none; }
-  @keyframes sheet-in { from { transform: translateY(100%); } }
-  .win__bar { height: 52px; padding: 0 6px 0 16px; }
-  .win__bar::before { content: ''; position: absolute; left: 50%; top: 6px; width: 40px; height: 4px; margin-left: -20px; border-radius: 2px; background: var(--line-2); }
-  .win__bar { position: relative; }
+  .win.is-bg { display: none; }
+  .win.is-active { box-shadow: none; border: 0; }
+  @keyframes app-in { from { opacity: 0; transform: translateY(24px) scale(0.98); } }
+  .win.is-closing { animation: app-out 0.17s ease-in forwards; }
+  @keyframes app-out { to { opacity: 0; transform: translateY(24px) scale(0.98); } }
+  .win__bar { position: relative; height: calc(54px + var(--sat)); padding: var(--sat) 8px 0 4px; gap: 4px; background: rgba(12, 7, 22, 0.96); }
+  .win__bar::before { content: ''; position: absolute; left: 50%; top: calc(var(--sat) + 5px); width: 36px; height: 4px; margin-left: -18px; border-radius: 2px; background: var(--line-2); }
+  .win__back { width: 48px; height: 48px; flex: none; color: var(--text); }
+  .win__back:active { background: rgba(255, 255, 255, 0.12); }
+  .win__title { flex: 1; min-width: 0; font: 700 17px var(--font-body); letter-spacing: 0; text-transform: none; color: var(--text); }
+  .win__book {
+    flex: none; min-height: 40px; padding: 0 14px; border: 0; border-radius: 20px; background: var(--accent); color: var(--accent-ink);
+    font: 700 13px var(--font-body); box-shadow: 0 4px 16px rgba(157, 92, 255, 0.35);
+  }
+  .win__book:active { transform: scale(0.96); }
+  .win__body { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding-bottom: var(--sab); }
   .icon-btn { width: 44px; height: 44px; flex: none; }
 
-  /* Нижний док: 4 основные иконки. */
-  .dock { left: 0; right: 0; bottom: var(--banner-h); transform: none; max-width: none; border-radius: 0; border-width: 1px 0 0; justify-content: space-around; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); }
-  .dock__btn { width: 48px; height: 48px; }
-  .dock__btn:hover, .dock__btn:focus-visible { transform: none; }
-  .dock__sep, .dock__btn:nth-child(n + 6) { display: none; }
-  .book-fab {
-    display: block; position: fixed; z-index: 45; left: 16px; right: 16px; bottom: calc(var(--dock-h) + var(--banner-h) + 14px + env(safe-area-inset-bottom));
-    min-height: 52px; border: 0; border-radius: 14px; background: var(--accent); color: var(--accent-ink); font: 700 15px var(--font-body);
-    box-shadow: 0 10px 30px rgba(157, 92, 255, 0.28);
-  }
-  html.has-banner { --banner-h: 44px; }
-  .demo-banner { z-index: 90; font-size: 10px; line-height: 1.3; }
-  .toasts { left: 10px; right: 10px; top: 52px; }
-  .toast { max-width: none; }
-  .term { top: 6%; }
-
-  /* Элементы внутри окон. */
+  /* Элементы внутри приложений: крупные цели нажатия. */
   .btn--sm, .tab, .seg__b, .st, .toolbar input:not([type=checkbox]), .toolbar select, .range input { min-height: 44px; }
   .st { min-width: 44px; }
   .pad { padding: 16px; }
@@ -60,7 +120,8 @@
   .steps li:not(.is-now) em { display: none; }
   .steps li.is-now { flex: 3; }
   .book__step { padding: 14px 16px; }
-  .book__nav { padding: 10px 16px; position: sticky; bottom: 0; background: var(--surface-solid); border-top: 1px solid var(--line); z-index: 3; }
+  .book__nav { padding: 10px 16px calc(10px + var(--sab)); position: sticky; bottom: 0; background: var(--surface-solid); border-top: 1px solid var(--line); z-index: 3; }
+  .book__nav .btn { min-height: 50px; flex: 1; }
   .book__sum { border-left: 0; border-top: 1px solid var(--line); order: 3; }
   .opts { grid-template-columns: 1fr; }
   .opts--sm { grid-template-columns: 1fr 1fr; }
@@ -74,11 +135,32 @@
   .tablewrap { max-height: 46vh; }
   .toolbar input[type=search] { min-width: 0; flex: 1 1 100%; max-width: none; }
 
+  /* Обычный сайт на телефоне: вход в TopskillOS через меню. */
+  .cl-panel__os {
+    display: flex; align-items: center; gap: 12px; margin-top: 20px; min-height: 52px; padding: 0 16px; width: 100%;
+    border: 1px solid var(--line-2); border-radius: 14px; background: rgba(157, 92, 255, 0.14); color: var(--text); font: 600 15px var(--font-body);
+  }
+  .cl-panel__os svg { color: var(--accent); flex: none; }
+  .cl-menu { min-width: 64px; }
 }
 
 @media (max-width: 400px) {
-  .icons { grid-template-columns: repeat(3, 1fr); }
+  .icons { gap: 6px 0; }
+  .icon { font-size: 11px; }
+  .icon__img { width: 56px; height: 56px; }
   .taskbar__right .mono:not(:last-child) { display: none; }
+  .m-widget__free b { font-size: 38px; }
+}
+
+/* Телефон на боку: компактнее. */
+@media (max-height: 500px) and (pointer: coarse) {
+  .m-widget { display: none; }
+  .icons { grid-template-columns: repeat(6, 1fr); }
+  .icon { min-height: 80px; }
+  .icon__img { width: 48px; height: 48px; }
+  .dock__lbl { display: none; }
+  :root { --dock-h: 52px; }
+  .win__bar { height: calc(46px + var(--sat)); }
 }
 
 @media (min-width: 761px) and (max-width: 1100px) {

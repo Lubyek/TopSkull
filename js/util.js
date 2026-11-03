@@ -16,7 +16,9 @@ export function html(str) {
 }
 
 export const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-export const isMobile = () => window.matchMedia('(max-width: 760px)').matches;
+/** Телефон: узкий экран или телефон на боку (низкий сенсорный экран). То же условие стоит в styles/mobile.css. */
+export const PHONE_QUERY = '(max-width: 760px), (max-height: 500px) and (pointer: coarse)';
+export const isMobile = () => window.matchMedia(PHONE_QUERY).matches;
 
 /** Плавный счётчик числа (для цифр на главной). */
 export function countUp(el, to, { decimals = 0, ms = 900 } = {}) {

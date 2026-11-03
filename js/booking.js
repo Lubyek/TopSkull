@@ -88,6 +88,7 @@ export function mountBooking(body, ctx) {
       <aside class="book__sum" id="b-sum" aria-label="Сводка заказа"></aside>
     </div>`;
   const stepBox = $('#b-step', body);
+  let ticketShown = false;
 
   // ---------- сводка ----------
   function drawSummary() {
@@ -349,6 +350,7 @@ export function mountBooking(body, ctx) {
       packId: s.packId, packLabel: r.pack.label, minutes: r.pack.minutes, end: r.end, gift: r.giftMinutes,
       total: r.total, newGuest: s.newGuest, promo: s.promoOk, cashback: r.cashback,
     });
+    ticketShown = true;
     body.innerHTML = renderTicket(booking);
     bindTicket(body, booking, () => { body.innerHTML = ''; ctx.close(); ctx.open('book'); });
     toast(`<b>Бронь ${esc(booking.code)}</b><br>Ждём вас в ${esc(booking.start)}`);
@@ -370,6 +372,14 @@ export function mountBooking(body, ctx) {
     stepBox.querySelector('h2')?.focus({ preventScroll: true });
   });
   $('#b-back', body).addEventListener('click', () => { s.step = Math.max(1, s.step - 1); render(); });
+
+  // Системная «назад» на телефоне: шаг назад вместо закрытия брони (окно закрывается только с первого шага или с билета).
+  ctx.onBack = () => {
+    if (ticketShown || s.step <= 1) return false;
+    s.step -= 1;
+    render();
+    return true;
+  };
 
   render();
 }

@@ -5,6 +5,7 @@ import * as S from './sections.js';
 import * as C from './community.js';
 import { money, packPrice } from './pricing.js';
 import { esc, telHref, prefersReducedMotion, countUp } from './util.js';
+import { icon } from './icons.js';
 
 const PARTS = [
   ['tariffs', 'Тарифы', S.tariffs],
@@ -217,7 +218,7 @@ function setupMenu(root) {
   const panel = root.querySelector('#cl-panel');
   const set = (open) => { panel.hidden = !open; btn.setAttribute('aria-expanded', String(open)); };
   btn.addEventListener('click', () => { set(panel.hidden); if (!panel.hidden) panel.querySelector('a').focus(); });
-  panel.addEventListener('click', (e) => { if (e.target.closest('a')) set(false); });
+  panel.addEventListener('click', (e) => { if (e.target.closest('a, [data-mode]')) set(false); });
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { set(false); btn.focus(); } });
 }
 
@@ -230,13 +231,14 @@ export function renderClassic(root) {
       <button type="button" class="cl-menu" id="cl-menu" aria-expanded="false" aria-controls="cl-panel"><i></i> Меню</button>
       <a class="logo cl-logo" href="#cl-top" aria-label="TOPSKILL, наверх">TOP<b>SKILL</b><span class="cursor">▮</span></a>
       <span class="cl-nav__r">
-        <button type="button" class="btn btn--ghost btn--sm" id="cl-os">Режим TopskillOS</button>
+        <button type="button" class="btn btn--ghost btn--sm" id="cl-os" data-mode="os">Режим TopskillOS</button>
         <button type="button" class="btn btn--accent btn--sm" data-open="book">Забронировать</button>
       </span>
       <span class="cl-progress" id="cl-progress" aria-hidden="true"></span>
     </header>
     <nav class="cl-panel" id="cl-panel" aria-label="Разделы" hidden>
       ${PARTS.map(([id, t], n) => `<a href="#cl-${id}"><span class="mono">0${n + 1}</span>${t}</a>`).join('')}
+      <button type="button" class="cl-panel__os" data-mode="os">${icon('grid', 20)} Открыть как приложение: TopskillOS</button>
       <p class="mono muted">${esc(main.address)}<br><a href="${telHref(main.phone)}">${esc(main.phone)}</a> · ${CLUB.hours}</p>
     </nav>
     <main>

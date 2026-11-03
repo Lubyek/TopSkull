@@ -6,6 +6,10 @@
   <title>TOPSKILL: компьютерный клуб в Челябинске, круглосуточно</title>
   <meta name="description" content="TOPSKILL — компьютерный клуб в центре Челябинска. Мощные игровые ПК, PS5, Bootcamp для команд, кинозал и VR. Открыто 24/7. Новичкам 2 часа в подарок.">
   <meta name="theme-color" content="#07050d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TOPSKILL">
   <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMwNzA1MGQiLz48cGF0aCBkPSJNMTQgMThoMzZ2OEgzNnYyMmgtOFYyNkgxNHoiIGZpbGw9IiNFREYxRjciLz48cmVjdCB4PSI0MCIgeT0iMzgiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzlkNWNmZiIvPjwvc3ZnPgo=" type="image/svg+xml">
 
   <meta property="og:type" content="website">
@@ -802,7 +806,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 }
 
 /* ---------- Бронь поверх обычного сайта ---------- */
-.cl-modal { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 16px; background: rgba(4, 5, 8, 0.72); backdrop-filter: blur(8px); animation: fade 0.25s ease-out; }
+.cl-modal { position: fixed; inset: 0 0 var(--banner-h); z-index: 70; display: grid; place-items: center; padding: 16px; background: rgba(4, 5, 8, 0.72); backdrop-filter: blur(8px); animation: fade 0.25s ease-out; }
 .cl-modal__box { width: min(1040px, 100%); height: min(780px, 100%); display: flex; flex-direction: column; overflow: hidden; background: var(--surface-solid); border: 1px solid var(--line-2); border-radius: 20px; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6); animation: modal-in 0.35s var(--ease); }
 .cl-modal__bar { display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 8px 0 18px; flex: none; border-bottom: 1px solid var(--line); color: var(--muted); letter-spacing: 0.1em; }
 .cl-modal__body { flex: 1; overflow: auto; outline: none; }
@@ -811,56 +815,116 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 
 </style>
   <style>
-/* Телефон и узкие экраны: окна становятся полноэкранными «приложениями». */
-@media (max-width: 760px) {
-  :root { --dock-h: 64px; }
-  .hide-sm { display: none !important; }
+/* ---------- Мобильная ОС ----------
+   На телефоне (узкий экран или телефон на боку) TopskillOS превращается в мобильную систему:
+   строка состояния, главный экран с виджетом и сеткой приложений, нижняя панель,
+   приложения на весь экран с кнопкой «назад». Условие то же, что PHONE_QUERY в js/util.js. */
 
-  .taskbar { padding: 0 12px; }
-  .taskbar__clock { position: static; transform: none; margin-left: auto; font-size: 12px; }
-  .taskbar__right { gap: 10px; }
-  .taskbar__right .mono { font-size: 11px; }
-  .status { font-size: 11px; }
-  #mode-toggle { display: none; }
+/* Только для телефона: на компьютере этих элементов нет. */
+.m-widget, .icon--site, .dock__lbl, .win__back, .win__book, .win__name, .status__short, .lbl-short { display: none; }
+.cl-panel__os { display: none; }
 
-  /* Рабочий стол = главный экран мобильной ОС: плакат и сетка иконок. */
-  .desktop { z-index: auto; display: block; overflow-y: auto; padding: 14px 16px calc(var(--dock-h) + var(--banner-h) + 84px); }
-    .icons { position: static; pointer-events: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; overflow: visible; }
-  .icon { position: static; width: auto; min-height: 88px; font-size: 11px; cursor: pointer; touch-action: auto; }
-  .win__rs { display: none; }
-  .icon__img { width: 52px; height: 52px; }
+@media (max-width: 760px), (max-height: 500px) and (pointer: coarse) {
+  :root { --taskbar-h: 44px; --dock-h: 62px; --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); }
+  .hide-sm, .win__rs, .win__file, .win__ctl, .taskbar .logo, .taskbar__clock .sec, .lbl-full, .status__full { display: none !important; }
+  .m-widget { display: block; }
+  .icon--site { display: flex; }
+  .dock__lbl { display: block; }
+  .win__back { display: inline-grid; }
+  .win__book { display: inline-flex; align-items: center; }
+  .win__name, .lbl-short, .status__short { display: inline; }
 
+  html, body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+  button, a, [role=button], input, select, label { touch-action: manipulation; }
+  input, select, textarea { font-size: 16px; } /* иначе iOS приближает страницу при вводе */
+
+  /* Строка состояния: часы слева, статус и переход на сайт справа. */
+  .taskbar { height: calc(var(--taskbar-h) + var(--sat)); padding: var(--sat) 14px 0; background: rgba(8, 5, 14, 0.82); }
+  .taskbar__clock { position: static; transform: none; order: -1; font: 700 15px var(--font-mono); letter-spacing: 0.02em; }
+  .taskbar__right { gap: 10px; margin-left: auto; }
+  .taskbar__right .mono, .status { font-size: 12px; }
+  #mode-toggle { min-height: 34px; padding: 0 12px; border-radius: 17px; font-size: 12px; }
+
+  /* Главный экран. */
+  .desktop {
+    z-index: auto; display: block; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+    inset: calc(var(--taskbar-h) + var(--sat)) 0 calc(var(--dock-h) + var(--banner-h) + var(--sab)) 0;
+    padding: 10px 16px 16px;
+  }
+  .m-widget {
+    margin-bottom: 12px; padding: 14px 16px; border: 1px solid var(--line-2); border-radius: 22px;
+    background: linear-gradient(145deg, rgba(74, 29, 150, 0.55), rgba(19, 12, 33, 0.85) 70%);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+  }
+  .m-widget__top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  .m-widget .logo { font-size: 16px; }
+  .m-widget__top .mono { font-size: 11px; }
+  .m-widget__free { display: flex; align-items: baseline; gap: 10px; }
+  .m-widget__free b { font: 800 40px/1 var(--font-head); letter-spacing: -0.05em; color: var(--text); }
+  .m-widget__free span { color: var(--muted); font-size: 14px; }
+  .m-widget__sub { margin: 4px 0 12px; font-size: 13px; color: #d5dae6; }
+  .m-widget__row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; }
+  .m-widget__row .btn { min-height: 50px; padding: 0 12px; font-size: 15px; text-decoration: none; }
+
+  .icons { position: static; pointer-events: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 4px; }
+  .icon { position: static; width: auto; min-height: 86px; padding: 8px 2px; font-size: 12px; line-height: 1.2; cursor: pointer; touch-action: manipulation; }
+  .icon:hover { background: none; border-color: transparent; }
+  .icon:active { transform: scale(0.94); }
+  .icon:active .icon__img { background: var(--accent); color: var(--accent-ink); }
+  .icon__img { width: 60px; height: 60px; border-radius: 16px; }
+  .icon__img svg { width: 28px; height: 28px; }
+  .icon--site .icon__img { color: var(--cyan); }
+
+  /* Нижняя панель: основные приложения с подписями. */
+  .dock {
+    left: 0; right: 0; bottom: var(--banner-h); transform: none; max-width: none; height: calc(var(--dock-h) + var(--sab));
+    align-items: flex-start; justify-content: space-around; gap: 0; padding: 6px 6px var(--sab);
+    border-radius: 0; border-width: 1px 0 0; background: rgba(12, 7, 22, 0.9);
+  }
+  .dock__btn {
+    width: 25%; height: 100%; max-height: 54px; flex-direction: column; gap: 3px; padding: 0; border: 0; border-radius: 12px; background: none;
+    font: 500 11px var(--font-body); color: var(--muted); display: flex; align-items: center; justify-content: center;
+  }
+  .dock__btn svg { width: 24px; height: 24px; }
+  .dock__btn:hover, .dock__btn:focus-visible { transform: none; border-color: transparent; color: var(--text); }
+  .dock__btn:active { background: rgba(255, 255, 255, 0.08); }
+  .dock__btn.is-open { color: var(--accent); }
+  .dock__btn.is-open::after { display: none; }
+  .dock__sep, .dock__btn:nth-child(n + 5) { display: none; }
+  .book-fab { display: none !important; }
+
+  html.has-banner { --banner-h: 44px; }
+  .demo-banner { z-index: 90; font-size: 10px; line-height: 1.3; padding-bottom: var(--sab); }
+  .toasts { left: 10px; right: 10px; top: calc(52px + var(--sat)); }
+  .toast { max-width: none; }
+  .term { top: calc(6% + var(--sat)); }
+
+  /* Приложение: экран поверх главного. */
   .windows { position: static; }
   .win {
-    position: fixed; left: 0 !important; top: 0 !important; width: 100% !important; height: 100dvh !important;
-    z-index: 200 !important; border-radius: 0; border: 0; min-width: 0; min-height: 0;
-    animation: sheet-in 0.26s var(--ease);
-    padding-bottom: env(safe-area-inset-bottom);
+    position: fixed; left: 0 !important; top: 0 !important; width: 100% !important; height: calc(100dvh - var(--banner-h)) !important;
+    z-index: 200 !important; border-radius: 0; border: 0; min-width: 0; min-height: 0; background: var(--surface-solid);
+    animation: app-in 0.28s var(--ease);
   }
-  .win.is-active { box-shadow: none; }
-  @keyframes sheet-in { from { transform: translateY(100%); } }
-  .win__bar { height: 52px; padding: 0 6px 0 16px; }
-  .win__bar::before { content: ''; position: absolute; left: 50%; top: 6px; width: 40px; height: 4px; margin-left: -20px; border-radius: 2px; background: var(--line-2); }
-  .win__bar { position: relative; }
+  .win.is-bg { display: none; }
+  .win.is-active { box-shadow: none; border: 0; }
+  @keyframes app-in { from { opacity: 0; transform: translateY(24px) scale(0.98); } }
+  .win.is-closing { animation: app-out 0.17s ease-in forwards; }
+  @keyframes app-out { to { opacity: 0; transform: translateY(24px) scale(0.98); } }
+  .win__bar { position: relative; height: calc(54px + var(--sat)); padding: var(--sat) 8px 0 4px; gap: 4px; background: rgba(12, 7, 22, 0.96); }
+  .win__bar::before { content: ''; position: absolute; left: 50%; top: calc(var(--sat) + 5px); width: 36px; height: 4px; margin-left: -18px; border-radius: 2px; background: var(--line-2); }
+  .win__back { width: 48px; height: 48px; flex: none; color: var(--text); }
+  .win__back:active { background: rgba(255, 255, 255, 0.12); }
+  .win__title { flex: 1; min-width: 0; font: 700 17px var(--font-body); letter-spacing: 0; text-transform: none; color: var(--text); }
+  .win__book {
+    flex: none; min-height: 40px; padding: 0 14px; border: 0; border-radius: 20px; background: var(--accent); color: var(--accent-ink);
+    font: 700 13px var(--font-body); box-shadow: 0 4px 16px rgba(157, 92, 255, 0.35);
+  }
+  .win__book:active { transform: scale(0.96); }
+  .win__body { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding-bottom: var(--sab); }
   .icon-btn { width: 44px; height: 44px; flex: none; }
 
-  /* Нижний док: 4 основные иконки. */
-  .dock { left: 0; right: 0; bottom: var(--banner-h); transform: none; max-width: none; border-radius: 0; border-width: 1px 0 0; justify-content: space-around; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); }
-  .dock__btn { width: 48px; height: 48px; }
-  .dock__btn:hover, .dock__btn:focus-visible { transform: none; }
-  .dock__sep, .dock__btn:nth-child(n + 6) { display: none; }
-  .book-fab {
-    display: block; position: fixed; z-index: 45; left: 16px; right: 16px; bottom: calc(var(--dock-h) + var(--banner-h) + 14px + env(safe-area-inset-bottom));
-    min-height: 52px; border: 0; border-radius: 14px; background: var(--accent); color: var(--accent-ink); font: 700 15px var(--font-body);
-    box-shadow: 0 10px 30px rgba(157, 92, 255, 0.28);
-  }
-  html.has-banner { --banner-h: 44px; }
-  .demo-banner { z-index: 90; font-size: 10px; line-height: 1.3; }
-  .toasts { left: 10px; right: 10px; top: 52px; }
-  .toast { max-width: none; }
-  .term { top: 6%; }
-
-  /* Элементы внутри окон. */
+  /* Элементы внутри приложений: крупные цели нажатия. */
   .btn--sm, .tab, .seg__b, .st, .toolbar input:not([type=checkbox]), .toolbar select, .range input { min-height: 44px; }
   .st { min-width: 44px; }
   .pad { padding: 16px; }
@@ -873,7 +937,8 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   .steps li:not(.is-now) em { display: none; }
   .steps li.is-now { flex: 3; }
   .book__step { padding: 14px 16px; }
-  .book__nav { padding: 10px 16px; position: sticky; bottom: 0; background: var(--surface-solid); border-top: 1px solid var(--line); z-index: 3; }
+  .book__nav { padding: 10px 16px calc(10px + var(--sab)); position: sticky; bottom: 0; background: var(--surface-solid); border-top: 1px solid var(--line); z-index: 3; }
+  .book__nav .btn { min-height: 50px; flex: 1; }
   .book__sum { border-left: 0; border-top: 1px solid var(--line); order: 3; }
   .opts { grid-template-columns: 1fr; }
   .opts--sm { grid-template-columns: 1fr 1fr; }
@@ -887,11 +952,32 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   .tablewrap { max-height: 46vh; }
   .toolbar input[type=search] { min-width: 0; flex: 1 1 100%; max-width: none; }
 
+  /* Обычный сайт на телефоне: вход в TopskillOS через меню. */
+  .cl-panel__os {
+    display: flex; align-items: center; gap: 12px; margin-top: 20px; min-height: 52px; padding: 0 16px; width: 100%;
+    border: 1px solid var(--line-2); border-radius: 14px; background: rgba(157, 92, 255, 0.14); color: var(--text); font: 600 15px var(--font-body);
+  }
+  .cl-panel__os svg { color: var(--accent); flex: none; }
+  .cl-menu { min-width: 64px; }
 }
 
 @media (max-width: 400px) {
-  .icons { grid-template-columns: repeat(3, 1fr); }
+  .icons { gap: 6px 0; }
+  .icon { font-size: 11px; }
+  .icon__img { width: 56px; height: 56px; }
   .taskbar__right .mono:not(:last-child) { display: none; }
+  .m-widget__free b { font-size: 38px; }
+}
+
+/* Телефон на боку: компактнее. */
+@media (max-height: 500px) and (pointer: coarse) {
+  .m-widget { display: none; }
+  .icons { grid-template-columns: repeat(6, 1fr); }
+  .icon { min-height: 80px; }
+  .icon__img { width: 48px; height: 48px; }
+  .dock__lbl { display: none; }
+  :root { --dock-h: 52px; }
+  .win__bar { height: calc(46px + var(--sat)); }
 }
 
 @media (min-width: 761px) and (max-width: 1100px) {
@@ -952,15 +1038,16 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
       <a class="logo" href="#" id="logo" aria-label="TOPSKILL">TOP<b>SKILL</b><span class="cursor">▮</span></a>
       <div class="taskbar__clock" id="clock" aria-label="Время в Челябинске">--:--:--</div>
       <div class="taskbar__right">
-        <span class="status"><i class="dot"></i>Открыто сейчас</span>
+        <span class="status"><i class="dot"></i><span class="status__full">Открыто сейчас</span><span class="status__short">24/7</span></span>
         <span class="mono hide-sm" title="Демо">ping <b id="ping">8</b> ms</span>
         <span class="mono">мест: <b id="free-seats">--</b></span>
-        <button type="button" class="btn btn--ghost btn--sm" id="mode-toggle">Обычный сайт</button>
+        <button type="button" class="btn btn--ghost btn--sm" id="mode-toggle" data-mode="classic"><span class="lbl-full">Обычный сайт</span><span class="lbl-short">Сайт</span></button>
       </div>
     </header>
 
     <main id="desktop" class="desktop" tabindex="-1">
       <h1 class="sr">TOPSKILL: компьютерный клуб в Челябинске, круглосуточно</h1>
+      <section class="m-widget" id="m-widget" aria-label="Клуб сейчас"></section>
       <nav class="icons" id="icons" aria-label="Приложения"></nav>
       <div class="windows" id="windows"></div>
     </main>
@@ -1753,6 +1840,7 @@ const P = {
   film: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/>',
   vr: '<path d="M3 8h18v8a2 2 0 0 1-2 2h-3l-2-3h-4l-2 3H5a2 2 0 0 1-2-2z"/>',
   school: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3.2 3 3.2 15 0 18M12 3c-3.2 3-3.2 15 0 18"/>',
   send: '<path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/>',
 };
 
@@ -1761,6 +1849,74 @@ const icon = (name, size = 22) =>
   `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${P[name] || ''}</svg>`;
 
 return { icon };
+})();
+__m['nav'] = (() => {
+// Системная кнопка «назад» на телефоне: приложения и окно брони живут как «слои» истории браузера.
+// Жест «назад» или аппаратная кнопка закрывает верхний слой (или шаг брони), а не уводит с сайта.
+const layers = []; // { close(), back?() }: close закрывает слой, back возвращает true, если «назад» обработан внутри
+let ignore = 0; // сколько popstate вызвано нами самими и должно быть пропущено
+let pendingPush = 0; // записи истории, которые ждут окончания нашего возврата назад
+let failSafe = 0;
+
+function safe(fn) { try { fn(); } catch { /* история может быть недоступна (iframe, песочница) */ } }
+const pushEntry = () => safe(() => history.pushState({ tsk: layers.length }, ''));
+
+/** Наш возврат по истории закончился: теперь можно добавлять отложенные записи. */
+function settled() {
+  clearTimeout(failSafe);
+  ignore = 0;
+  for (; pendingPush > 0; pendingPush -= 1) pushEntry();
+}
+
+/** Возврат по истории выполняется асинхронно; пока он идёт, pushState делать нельзя (записи перепутаются). */
+function traverse(fn) {
+  ignore += 1;
+  clearTimeout(failSafe);
+  failSafe = setTimeout(settled, 600); // страховка, если popstate не придёт
+  safe(fn);
+}
+
+/** Открыть слой: добавляет запись в историю. */
+function pushLayer(layer) {
+  layers.push(layer);
+  if (ignore > 0) pendingPush += 1; else pushEntry();
+  return layer;
+}
+
+/** Закрыть слой из интерфейса: окно закрывается сразу, запись истории убирается следом. */
+function closeLayer(layer) {
+  const i = layers.indexOf(layer);
+  if (i < 0) return;
+  layers.splice(i, 1);
+  if (pendingPush > 0) pendingPush -= 1; // его запись ещё не создана: просто отменяем
+  else if (i === layers.length) traverse(() => history.back()); // был верхним: убираем его запись из истории
+  layer.close();
+}
+
+/** Убрать слой без закрытия окна (окно уже закрыто другим способом). */
+function dropLayer(layer) {
+  const i = layers.indexOf(layer);
+  if (i >= 0) layers.splice(i, 1);
+}
+
+/** Забыть все слои (например, при переходе на обычный сайт), вернув историю на место. */
+function resetLayers() {
+  const n = layers.length - pendingPush;
+  layers.length = 0;
+  pendingPush = 0;
+  if (n > 0) traverse(() => history.go(-n));
+}
+
+window.addEventListener('popstate', () => {
+  if (ignore > 0) { ignore -= 1; if (ignore === 0) settled(); return; }
+  const top = layers[layers.length - 1];
+  if (!top) return;
+  if (top.back?.()) { pushEntry(); return; } // «назад» обработано внутри (например, шаг брони)
+  layers.pop();
+  top.close();
+});
+
+return { pushLayer, closeLayer, dropLayer, resetLayers };
 })();
 __m['util'] = (() => {
 // Мелкие помощники, общие для всех модулей.
@@ -1781,7 +1937,9 @@ function html(str) {
 }
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const isMobile = () => window.matchMedia('(max-width: 760px)').matches;
+/** Телефон: узкий экран или телефон на боку (низкий сенсорный экран). То же условие стоит в styles/mobile.css. */
+const PHONE_QUERY = '(max-width: 760px), (max-height: 500px) and (pointer: coarse)';
+const isMobile = () => window.matchMedia(PHONE_QUERY).matches;
 
 /** Плавный счётчик числа (для цифр на главной). */
 function countUp(el, to, { decimals = 0, ms = 900 } = {}) {
@@ -1863,13 +2021,15 @@ function beep() {
   } catch { /* звук необязателен */ }
 }
 
-return { esc, $, $$, html, prefersReducedMotion, isMobile, countUp, maskPhone, phoneValid, telHref, plural, minutesText, dateLabel, toast, beep };
+return { esc, $, $$, html, prefersReducedMotion, PHONE_QUERY, isMobile, countUp, maskPhone, phoneValid, telHref, plural, minutesText, dateLabel, toast, beep };
 })();
 __m['windows'] = (() => {
 // Менеджер окон: открытие «из иконки», фокус, перетаскивание, сворачивание, развёртывание, закрытие.
-// На телефоне окна — полноэкранные «приложения», перетаскивания нет, закрывает свайп вниз.
+// На телефоне окна — полноэкранные «приложения» мобильной ОС: открыто одно, сверху кнопка «назад»,
+// системная «назад» и свайп вниз по заголовку возвращают на главный экран.
 const { APPS } = __m['data'];
 const { icon } = __m['icons'];
+const { pushLayer, closeLayer, dropLayer } = __m['nav'];
 const { esc, isMobile, prefersReducedMotion } = __m['util'];
 
 const registry = new Map(); // id → render(body, ctx) → необязательная функция очистки
@@ -1911,7 +2071,8 @@ function focusWindow(id) {
   const wasMin = w.el.classList.contains('is-min');
   w.el.classList.remove('is-min');
   w.el.style.zIndex = String(++z);
-  wins.forEach((x, k) => x.el.classList.toggle('is-active', k === id));
+  // На телефоне видно только одно приложение, остальные ждут «под ним».
+  wins.forEach((x, k) => { x.el.classList.toggle('is-active', k === id); x.el.classList.toggle('is-bg', k !== id && isMobile()); });
   notify();
   if (wasMin) genie(w.el, id, false); // окно «вылетает» из дока
 }
@@ -1957,7 +2118,8 @@ function genie(el, id, toDock, done) {
 function openApp(id, opts = {}) {
   const meta = appMeta(id);
   if (!meta || !registry.has(id)) return null;
-  const existing = wins.get(id);
+  let existing = wins.get(id);
+  if (existing?.closing) { closeNow(id, true); existing = null; } // окно ещё закрывается: открываем заново
   if (existing) {
     focusWindow(id);
     existing.el.querySelector('.win__body')?.focus({ preventScroll: true });
@@ -1992,7 +2154,9 @@ function openApp(id, opts = {}) {
 
   el.innerHTML = `
     <header class="win__bar" tabindex="0" aria-label="Заголовок окна ${esc(meta.title)}. Стрелки двигают окно, Esc закрывает">
-      <span class="win__title">${esc(meta.file)}</span>
+      <button type="button" class="win__back icon-btn" data-act="back" aria-label="Назад">${icon('back', 22)}</button>
+      <span class="win__title"><span class="win__file">${esc(meta.file)}</span><span class="win__name">${esc(meta.title)}</span></span>
+      ${id === 'book' ? '' : `<button type="button" class="win__book" data-open="book">Забронировать</button>`}
       <span class="win__ctl">
         <button type="button" class="icon-btn" data-act="min" aria-label="Свернуть">${icon('min', 16)}</button>
         <button type="button" class="icon-btn hide-sm" data-act="max" aria-label="Развернуть на весь экран">${icon('max', 16)}</button>
@@ -2006,7 +2170,10 @@ function openApp(id, opts = {}) {
   const body = el.querySelector('.win__body');
   const ctx = { id, el, body, open: openApp, close: () => closeWindow(id), opts };
   const cleanup = registry.get(id)(body, ctx);
-  wins.set(id, { el, cleanup, opener: document.activeElement });
+  const entry = { el, cleanup, opener: document.activeElement, ctx, layer: null, closing: false };
+  wins.set(id, entry);
+  // На телефоне приложение — слой истории: системная «назад» закрывает его (или шаг внутри него).
+  if (mobile) entry.layer = pushLayer({ close: () => closeNow(id), back: () => !!ctx.onBack?.() });
   wire(el, id);
   focusWindow(id);
   body.focus({ preventScroll: true });
@@ -2015,18 +2182,42 @@ function openApp(id, opts = {}) {
 
 function closeWindow(id) {
   const w = wins.get(id);
-  if (!w) return;
+  if (!w || w.closing) return;
+  if (w.layer) { closeLayer(w.layer); return; } // слой сам вызовет closeNow
+  closeNow(id);
+}
+
+/** «Назад» в приложении: сначала шаг внутри него (например, шаг брони), иначе закрыть. */
+function goBack(id) {
+  const w = wins.get(id);
+  if (!w || w.closing) return;
+  if (w.ctx.onBack?.()) return;
+  closeWindow(id);
+}
+
+/** Закрыть все приложения сразу (при переходе на обычный сайт). */
+function closeAllWindows() {
+  [...wins.keys()].forEach((id) => closeNow(id, true));
+}
+
+function closeNow(id, instant = false) {
+  const w = wins.get(id);
+  if (!w || (w.closing && !instant)) return;
+  w.closing = true;
+  if (w.layer) { dropLayer(w.layer); w.layer = null; }
   const done = () => {
+    if (w.finished) return; // окно уже убрано (например, досрочно при повторном открытии)
+    w.finished = true;
     try { w.cleanup?.(); } catch { /* окно закрывается в любом случае */ }
     w.el.remove();
-    wins.delete(id);
+    if (wins.get(id) === w) wins.delete(id);
     syncMax();
     const next = activeId();
     if (next) focusWindow(next);
     notify();
     if (w.opener && document.contains(w.opener)) w.opener.focus?.({ preventScroll: true });
   };
-  if (prefersReducedMotion()) { done(); return; }
+  if (instant || prefersReducedMotion()) { done(); return; }
   w.el.classList.add('is-closing');
   setTimeout(done, 170);
 }
@@ -2076,6 +2267,7 @@ function wire(el, id) {
     if (act === 'max') toggleMax(el);
     if (act === 'close') closeWindow(id);
   });
+  el.querySelector('.win__back').addEventListener('click', () => goBack(id));
   const bar = el.querySelector('.win__bar');
   bar.addEventListener('dblclick', (e) => { if (!e.target.closest('button') && !isMobile()) toggleMax(el); });
   enableDrag(el, bar, id);
@@ -2206,7 +2398,7 @@ function enableResize(el) {
   });
 }
 
-return { registerApp, onWindowsChange, state, focusWindow, openApp, closeWindow, cycleWindows, isOpen };
+return { registerApp, onWindowsChange, state, focusWindow, openApp, closeWindow, closeAllWindows, cycleWindows, isOpen };
 })();
 __m['ticket'] = (() => {
 // Билет-ваучер после брони: QR-заглушка, .ics для календаря, копирование и звонок.
@@ -2395,6 +2587,7 @@ function mountBooking(body, ctx) {
       <aside class="book__sum" id="b-sum" aria-label="Сводка заказа"></aside>
     </div>`;
   const stepBox = $('#b-step', body);
+  let ticketShown = false;
 
   // ---------- сводка ----------
   function drawSummary() {
@@ -2656,6 +2849,7 @@ function mountBooking(body, ctx) {
       packId: s.packId, packLabel: r.pack.label, minutes: r.pack.minutes, end: r.end, gift: r.giftMinutes,
       total: r.total, newGuest: s.newGuest, promo: s.promoOk, cashback: r.cashback,
     });
+    ticketShown = true;
     body.innerHTML = renderTicket(booking);
     bindTicket(body, booking, () => { body.innerHTML = ''; ctx.close(); ctx.open('book'); });
     toast(`<b>Бронь ${esc(booking.code)}</b><br>Ждём вас в ${esc(booking.start)}`);
@@ -2677,6 +2871,14 @@ function mountBooking(body, ctx) {
     stepBox.querySelector('h2')?.focus({ preventScroll: true });
   });
   $('#b-back', body).addEventListener('click', () => { s.step = Math.max(1, s.step - 1); render(); });
+
+  // Системная «назад» на телефоне: шаг назад вместо закрытия брони (окно закрывается только с первого шага или с билета).
+  ctx.onBack = () => {
+    if (ticketShown || s.step <= 1) return false;
+    s.step -= 1;
+    render();
+    return true;
+  };
 
   render();
 }
@@ -3486,6 +3688,7 @@ const S = __m['sections'];
 const C = __m['community'];
 const { money, packPrice } = __m['pricing'];
 const { esc, telHref, prefersReducedMotion, countUp } = __m['util'];
+const { icon } = __m['icons'];
 
 const PARTS = [
   ['tariffs', 'Тарифы', S.tariffs],
@@ -3698,7 +3901,7 @@ function setupMenu(root) {
   const panel = root.querySelector('#cl-panel');
   const set = (open) => { panel.hidden = !open; btn.setAttribute('aria-expanded', String(open)); };
   btn.addEventListener('click', () => { set(panel.hidden); if (!panel.hidden) panel.querySelector('a').focus(); });
-  panel.addEventListener('click', (e) => { if (e.target.closest('a')) set(false); });
+  panel.addEventListener('click', (e) => { if (e.target.closest('a, [data-mode]')) set(false); });
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { set(false); btn.focus(); } });
 }
 
@@ -3711,13 +3914,14 @@ function renderClassic(root) {
       <button type="button" class="cl-menu" id="cl-menu" aria-expanded="false" aria-controls="cl-panel"><i></i> Меню</button>
       <a class="logo cl-logo" href="#cl-top" aria-label="TOPSKILL, наверх">TOP<b>SKILL</b><span class="cursor">▮</span></a>
       <span class="cl-nav__r">
-        <button type="button" class="btn btn--ghost btn--sm" id="cl-os">Режим TopskillOS</button>
+        <button type="button" class="btn btn--ghost btn--sm" id="cl-os" data-mode="os">Режим TopskillOS</button>
         <button type="button" class="btn btn--accent btn--sm" data-open="book">Забронировать</button>
       </span>
       <span class="cl-progress" id="cl-progress" aria-hidden="true"></span>
     </header>
     <nav class="cl-panel" id="cl-panel" aria-label="Разделы" hidden>
       ${PARTS.map(([id, t], n) => `<a href="#cl-${id}"><span class="mono">0${n + 1}</span>${t}</a>`).join('')}
+      <button type="button" class="cl-panel__os" data-mode="os">${icon('grid', 20)} Открыть как приложение: TopskillOS</button>
       <p class="mono muted">${esc(main.address)}<br><a href="${telHref(main.phone)}">${esc(main.phone)}</a> · ${CLUB.hours}</p>
     </nav>
     <main>
@@ -3761,11 +3965,12 @@ return { renderClassic };
 })();
 __m['app'] = (() => {
 // Точка входа: загрузка, рабочий стол, панель задач, док, режимы и пасхалки.
-const { APPS } = __m['data'];
-const { wallNow } = __m['pricing'];
+const { APPS, BRANCHES } = __m['data'];
+const { wallNow, money, packPrice } = __m['pricing'];
 const { freeNow } = __m['availability'];
 const { onStoreEvent, load, save } = __m['store'];
-const { registerApp, openApp, onWindowsChange, isOpen, cycleWindows } = __m['windows'];
+const { registerApp, openApp, onWindowsChange, isOpen, cycleWindows, closeAllWindows } = __m['windows'];
+const { pushLayer, closeLayer, resetLayers } = __m['nav'];
 const S = __m['sections'];
 const C = __m['community'];
 const { mountBooking } = __m['booking'];
@@ -3773,7 +3978,7 @@ const { mountAdmin } = __m['admin'];
 const { initTerminal } = __m['terminal'];
 const { renderClassic } = __m['classic'];
 const { icon } = __m['icons'];
-const { $, $$, esc, toast, beep, prefersReducedMotion, isMobile } = __m['util'];
+const { $, $$, esc, toast, beep, prefersReducedMotion, isMobile, telHref, plural } = __m['util'];
 
 const root = document.documentElement;
 const osEl = $('#os');
@@ -3797,9 +4002,25 @@ function drawIcons() {
   $('#icons').innerHTML = APPS.map((a) => `
     <button type="button" class="icon" data-open="${a.id}" data-app-btn="${a.id}" aria-label="${esc(a.title)}. Alt и стрелки перемещают значок">
       <span class="icon__img">${icon(a.icon)}</span><span>${esc(a.title)}</span>
-    </button>`).join('');
+    </button>`).join('') + `
+    <button type="button" class="icon icon--site" data-mode="classic" aria-label="Обычный сайт">
+      <span class="icon__img">${icon('globe')}</span><span>Сайт</span>
+    </button>`;
   layoutIcons();
   enableIconDrag();
+}
+
+// ---------- главный экран телефона: виджет с главным действием ----------
+function drawWidget() {
+  const b = BRANCHES[0];
+  $('#m-widget').innerHTML = `
+    <div class="m-widget__top"><span class="logo">TOP<b>SKILL</b></span><span class="mono muted">Челябинск · 24/7</span></div>
+    <p class="m-widget__free"><b id="m-free">--</b><span id="m-free-lbl">мест свободно сейчас</span></p>
+    <p class="m-widget__sub">от ${money(packPrice('hall', 'h1', false))} за час. Новичкам 2 часа в подарок.</p>
+    <div class="m-widget__row">
+      <button type="button" class="btn btn--accent" data-open="book">Забронировать</button>
+      <a class="btn btn--ghost" href="${telHref(b.phone)}" aria-label="Позвонить в клуб ${esc(b.phone)}">${icon('phone', 18)} Позвонить</a>
+    </div>`;
 }
 
 // ---------- иконки на столе: свободное размещение ----------
@@ -3823,7 +4044,7 @@ function layoutIcons(reset = false) {
   if (reset) { iconPos = {}; save('icons', iconPos); }
   const mobile = isMobile();
   const area = box.getBoundingClientRect();
-  $$('.icon', box).forEach((el, i) => {
+  $$('.icon:not(.icon--site)', box).forEach((el, i) => {
     if (mobile || !area.width) { el.style.left = ''; el.style.top = ''; return; }
     const p = clampIcon(iconPos[el.dataset.open] || defaultIconPos(i, area.height), area);
     el.style.left = `${p.x}px`;
@@ -3896,7 +4117,7 @@ function drawDock(state = {}) {
   const base = APPS.filter((a) => a.dock);
   const extra = APPS.filter((a) => !a.dock && state[a.id]);
   const btn = (a) => `<button type="button" class="dock__btn${state[a.id] === 'open' ? ' is-open' : ''}${state[a.id] === 'min' ? ' is-open is-min' : ''}"
-    data-open="${a.id}" data-dock="${a.id}" title="${esc(a.title)}" aria-label="${esc(a.title)}">${icon(a.icon)}</button>`;
+    data-open="${a.id}" data-dock="${a.id}" title="${esc(a.title)}" aria-label="${esc(a.title)}">${icon(a.icon)}<span class="dock__lbl">${esc(a.title)}</span></button>`;
   $('#dock').innerHTML = base.map(btn).join('') + (extra.length ? `<i class="dock__sep"></i>${extra.map(btn).join('')}` : '');
 }
 
@@ -3905,18 +4126,28 @@ function drawDock(state = {}) {
 const modal = $('#cl-modal');
 const modalBody = $('#cl-modal-body');
 let modalOpener = null;
+let modalLayer = null;
 
-function closeModal() {
+function closeModalNow() {
+  modalLayer = null;
+  if (modal.hidden) return;
   modal.hidden = true;
   modalBody.innerHTML = '';
   modalOpener?.focus?.({ preventScroll: true });
+}
+
+function closeModal() {
+  if (modalLayer) closeLayer(modalLayer); else closeModalNow();
 }
 
 function openBookingModal(opts = {}) {
   modalOpener = opts.from || document.activeElement;
   modalBody.innerHTML = '';
   modal.hidden = false;
-  mountBooking(modalBody, { id: 'book', opts, close: closeModal, open: openSmart });
+  const ctx = { id: 'book', opts, close: closeModal, open: openSmart };
+  mountBooking(modalBody, ctx);
+  // На телефоне бронь — слой истории: системная «назад» возвращает на шаг назад или закрывает бронь.
+  if (isMobile()) modalLayer = pushLayer({ close: closeModalNow, back: () => !!ctx.onBack?.() });
   modalBody.focus({ preventScroll: true });
 }
 
@@ -3943,6 +4174,8 @@ modal.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('click', (e) => {
+  const m = e.target.closest('[data-mode]');
+  if (m) { setMode(m.dataset.mode, true); return; }
   const t = e.target.closest('[data-open]');
   if (!t) return;
   openSmart(t.dataset.open, { from: t, branch: t.dataset.branch });
@@ -3954,23 +4187,44 @@ onWindowsChange(drawDock);
 const pad = (n) => String(n).padStart(2, '0');
 function tick() {
   const d = wallNow();
-  $('#clock').textContent = `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+  // На телефоне секунды скрыты стилями: в строке состояния только часы и минуты.
+  $('#clock').innerHTML = `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}<span class="sec">:${pad(d.getUTCSeconds())}</span>`;
 }
-const refreshSeats = () => { $('#free-seats').textContent = freeNow(); };
+const refreshSeats = () => {
+  const n = freeNow();
+  $('#free-seats').textContent = n;
+  $('#m-free').textContent = n;
+  $('#m-free-lbl').textContent = plural(n, ['место свободно сейчас', 'места свободно сейчас', 'мест свободно сейчас']);
+};
 
 // ---------- режимы: ОС / обычный сайт ----------
-function setMode(mode) {
+// Телефон по умолчанию открывает обычный сайт, остальные устройства — TopskillOS.
+// Выбор запоминается только после явного переключения; для телефона и компьютера он свой.
+const modeKey = () => (isMobile() ? 'mode_phone' : 'mode');
+function startMode() {
+  if (location.hash === '#classic') return 'classic';
+  if (location.hash === '#os') return 'os';
+  const saved = load(modeKey(), null);
+  if (saved === 'classic' || saved === 'os') return saved;
+  return isMobile() ? 'classic' : 'os';
+}
+
+function setMode(mode, persist = false) {
   const classic = mode === 'classic';
-  if (classic) renderClassic(classicEl);
+  if (classic) {
+    // Уходя на сайт, закрываем приложения и слои истории, чтобы «назад» не листала невидимые экраны.
+    closeModalNow();
+    closeAllWindows();
+    resetLayers();
+    renderClassic(classicEl);
+  }
   osEl.hidden = classic;
   if (!classic) layoutIcons();
   classicEl.hidden = !classic;
   document.body.style.overflow = classic ? 'auto' : 'hidden';
   $('#book-fab').hidden = classic;
-  save('mode', mode);
-  if (classic) $('#cl-os')?.addEventListener('click', () => setMode('os'), { once: true });
+  if (persist) save(modeKey(), mode);
 }
-$('#mode-toggle').addEventListener('click', () => setMode('classic'));
 
 // ---------- уведомления о новых заявках ----------
 onStoreEvent((ev) => {
@@ -4009,9 +4263,8 @@ const BOOT_LINES = [
 function finishBoot() {
   $('#boot').hidden = true;
   try { sessionStorage.setItem('topskill_booted', '1'); } catch { /* не страшно */ }
-  const mode = location.hash === '#classic' ? 'classic' : load('mode', 'os');
   osEl.hidden = false;
-  setMode(mode === 'classic' ? 'classic' : 'os');
+  setMode(startMode());
   $('#desktop').focus({ preventScroll: true });
 }
 
@@ -4035,6 +4288,7 @@ function runBoot() {
 }
 
 // ---------- запуск ----------
+drawWidget();
 drawIcons();
 drawDock();
 tick();
@@ -4050,7 +4304,8 @@ $('#logo').addEventListener('click', (e) => e.preventDefault());
 
 let booted = false;
 try { booted = sessionStorage.getItem('topskill_booted') === '1'; } catch { /* покажем загрузку */ }
-if (booted || prefersReducedMotion()) finishBoot(); else runBoot();
+// На телефоне BIOS-заставки нет: человек пришёл забронировать место, а не смотреть загрузку.
+if (booted || prefersReducedMotion() || isMobile()) finishBoot(); else runBoot();
 
 return {  };
 })();
