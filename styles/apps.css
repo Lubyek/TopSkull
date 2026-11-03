@@ -108,10 +108,11 @@
 .pr-legend i { flex: none; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 7px; background: color-mix(in srgb, var(--c) 26%, transparent); border: 1px solid var(--c); font: 700 11px var(--font-mono); font-style: normal; color: #fff; }
 
 /* ---------- филиалы ---------- */
-.branches { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
-.map { margin: 0; border: 1px solid var(--line-2); border-radius: var(--radius); overflow: hidden; align-self: start; }
+/* Узкий вертикальный столбик, как на телефоне: линия филиалов, карта, карточка. На широком экране стоит по центру. */
+.branches { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 540px; margin-inline: auto; }
+.map { margin: 0; border: 1px solid var(--line-2); border-radius: var(--radius); overflow: hidden; }
 .map__stub svg { display: block; width: 100%; aspect-ratio: 1; }
-.map__live iframe { display: block; width: 100%; aspect-ratio: 1; min-height: 360px; border: 0; background: var(--surface-2); }
+.map__live iframe { display: block; width: 100%; aspect-ratio: auto; height: 240px; min-height: 0; border: 0; background: var(--surface-2); }
 .map__bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 8px 10px; border-top: 1px solid var(--line); }
 .gis { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0; font-size: 13px; }
 .gis__rate { padding: 2px 9px; border-radius: 999px; background: rgba(157, 92, 255, 0.12); color: var(--accent); font: 700 12px var(--font-mono); }
@@ -120,7 +121,9 @@
 .pin.is-on circle:nth-child(2) { fill: var(--hot); }
 .branch-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
 .branch.is-on { border-color: var(--accent); }
-.branches > p { grid-column: 1 / -1; }
+/* Выбор филиала в ленте над картой, ниже только его карточка (на телефоне и на компьютере одинаково). */
+.branch-list .branch:not(.is-on) { display: none; }
+.branches .map__bar { display: none; }
 
 /* ---------- отзывы: чат ---------- */
 .chat { display: flex; flex-direction: column; min-height: 100%; }
@@ -180,8 +183,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .hw > div { display: flex; flex-direction: column; align-items: flex-start; }
 .hw > div > .mono:last-child { margin-top: auto; padding-top: 12px; }
 .hw .spec { width: 100%; }
-.branches { grid-template-rows: 1fr auto; align-content: stretch; }
-.branches > p { align-self: end; margin-top: 8px; padding-top: 12px; }
+.branches > p { margin-top: auto; padding-top: 12px; }
 .row + p, .row + .mono { margin-top: 16px; }
 
 /* ---------- новости: карусель ---------- */
@@ -232,18 +234,10 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   .pr-prizes > summary::after { content: '+'; font: 400 22px var(--font-body); color: var(--accent); }
   .pr-prizes[open] > summary::after { content: '−'; }
   .pr-legend { grid-template-columns: 1fr 1fr; gap: 8px; }
-  /* Филиалы: карта сверху невысокой полосой, ниже список. */
-  .branches { display: flex; flex-direction: column; }
-  .branches .map { order: 1; }
-  .branches .branch-list { order: 2; }
-  .branches > p { order: 3; }
-  /* Выбор филиала в ленте над картой, ниже только его карточка. */
-  .branch-list .branch:not(.is-on) { display: none; }
-  .branches .map__bar { display: none; }
+  /* Филиалы: карта на телефоне ниже. */
   /* Тарифы: переключатель дня на всю ширину под зонами. */
   .tariffs .seg { display: flex; width: 100%; }
   .tariffs .seg__b { flex: 1; min-height: 40px; }
-  .map__live iframe { aspect-ratio: auto; height: 240px; min-height: 0; }
 }
 
 /* ---------- Телефон: компактнее и меньше текста (приложения и обычный сайт) ---------- */
