@@ -85,6 +85,7 @@ export const tariffs = {
     };
     const tabs = $$('[role=tab]', root);
     const pick = (btn) => {
+      if (btn.dataset.zone === zone) return; // та же зона: ничего не перерисовываем и не анимируем
       zone = btn.dataset.zone;
       tabs.forEach((t) => { const on = t === btn; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; });
       draw();
@@ -101,6 +102,7 @@ export const tariffs = {
       });
     });
     $$('[data-day]', root).forEach((b) => b.addEventListener('click', () => {
+      if ((b.dataset.day === 'weekend') === weekend) return; // тот же тип дня: без повторной перерисовки
       weekend = b.dataset.day === 'weekend';
       $$('[data-day]', root).forEach((x) => x.setAttribute('aria-pressed', x === b));
       draw();
