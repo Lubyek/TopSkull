@@ -269,3 +269,15 @@
   #t-panel > * { animation: panel-swap 0.18s ease-out; }
   @keyframes panel-swap { from { opacity: 0.4; transform: translateY(6px); } }
 }
+
+/* ---------- Филиалы на широком экране: карта слева, блок с информацией справа, оба одного размера ---------- */
+@media (min-width: 901px) {
+  .cl-body .branches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: minmax(380px, auto) auto; gap: 20px; align-items: stretch; max-width: 1040px; }
+  .cl-body .branches > p { grid-column: 1 / -1; margin-top: 4px; }
+  /* Карта растягивается на всю высоту ячейки, карточка тоже: размеры совпадают при любом филиале. */
+  .cl-body .branches .map { display: flex; flex-direction: column; }
+  .cl-body .branches .map__live { position: relative; flex: 1; min-height: 0; }
+  .cl-body .branches .map__live iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .cl-body .branches .branch-list { display: flex; }
+  .cl-body .branches .branch-list .branch.is-on { flex: 1; padding: 24px; }
+}
