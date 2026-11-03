@@ -1113,37 +1113,42 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
   .admin__split { grid-template-columns: 1fr 260px; }
 }
 
-/* ---------- Быстрый доступ (шторка) ---------- */
+/* ---------- Переключатель приложений ---------- */
 .qa-handle { display: none; }
-.qa { position: absolute; inset: 0; z-index: 120; }
-.qa__scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.28s; }
-.qa.is-open .qa__scrim { opacity: 1; }
-.qa__sheet {
-  position: absolute; left: 0; right: 0; bottom: var(--banner-h); max-height: 82%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none;
-  padding: 0 16px calc(18px + env(safe-area-inset-bottom, 0px)); border-radius: 26px 26px 0 0; border-top: 1px solid var(--line-2); background: var(--surface-solid);
-  transform: translateY(100%); transition: transform 0.3s var(--ease);
+.qa {
+  position: absolute; inset: 0; z-index: 120; display: flex; flex-direction: column; opacity: 0; transition: opacity 0.25s;
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) 0 calc(var(--banner-h) + env(safe-area-inset-bottom, 0px)); background: #06040c;
 }
-.qa__sheet::-webkit-scrollbar { display: none; }
-.qa.is-open .qa__sheet { transform: none; }
-.qa__top { position: sticky; top: 0; z-index: 1; margin: 0 -16px; padding: 0 16px 10px; background: var(--surface-solid); touch-action: none; cursor: grab; }
-.qa__grab { display: grid; place-items: center; height: 28px; }
-.qa__grab i { width: 40px; height: 5px; border-radius: 3px; background: var(--line-2); }
-.qa__head { display: flex; flex-direction: column; gap: 2px; }
-.qa__head b { font: 700 18px var(--font-body); }
-.qa__head .mono { font-size: 12px; }
-.qa__tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 6px 0 14px; }
+.qa.is-open { opacity: 1; }
+.sw { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.sw__cards {
+  flex: 1; min-height: 0; display: flex; align-items: center; gap: 22px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+  padding: 0 calc((100% - var(--cw, 260px)) / 2); scrollbar-width: none; overscroll-behavior: contain;
+}
+.sw__cards::-webkit-scrollbar { display: none; }
+.sw__card { flex: none; width: var(--cw, 260px); scroll-snap-align: center; touch-action: pan-x; transition: transform 0.22s var(--ease), opacity 0.22s; outline: none; }
+.sw__head { display: flex; align-items: center; gap: 10px; margin: 0 4px 10px; color: var(--text); font: 600 16px var(--font-body); }
+.sw__ico { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface-2); color: var(--accent); }
+.sw__view { position: relative; overflow: hidden; border: 1px solid var(--line-2); border-radius: 26px; background: var(--surface-solid); pointer-events: none; }
+.sw__card:focus-visible .sw__view { border-color: var(--accent); }
+.sw__scaled { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; transform-origin: 0 0; background: var(--surface-solid); }
+.sw__bar { display: flex; align-items: center; flex: none; height: 54px; padding: 0 20px; border-bottom: 1px solid var(--line); font: 700 17px var(--font-body); }
+.sw__scaled .win__body { flex: 1; overflow: hidden; }
+.sw__map { height: 240px; background: var(--surface-2); }
+.sw__empty { flex: 1; display: grid; place-items: center; padding: 0 36px; color: var(--muted); text-align: center; line-height: 1.5; }
+.sw__empty b { display: block; margin-bottom: 6px; color: var(--text); font-size: 18px; }
+.sw__foot { flex: none; display: grid; gap: 12px; padding: 12px 16px 14px; }
+.sw__clear { min-height: 48px; border: 1px solid var(--line-2); border-radius: 24px; background: rgba(255, 255, 255, 0.06); color: var(--text); font: 600 15px var(--font-body); }
+.sw__clear:active { background: rgba(255, 92, 200, 0.2); }
+.qa__tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .qa__tile {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 84px; padding: 8px 2px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 78px; padding: 8px 2px;
   border: 1px solid var(--line-2); border-radius: 18px; background: var(--surface-2); color: var(--text); text-decoration: none; font: 600 12px/1.2 var(--font-body); text-align: center;
 }
-.qa__tile svg { color: var(--accent); stroke-width: 1.7; }
+.qa__tile svg { color: var(--accent); }
 .qa__tile:active { transform: scale(0.95); background: rgba(157, 92, 255, 0.25); }
 .qa__tile--main { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .qa__tile--main svg { color: var(--accent-ink); }
-.qa__branches { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.qa__branches li { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255, 255, 255, 0.03); }
-.qa__branches li > div { flex: 1 1 120px; display: flex; flex-direction: column; min-width: 0; }
-.qa__branches .btn--sm { min-height: 44px; text-decoration: none; }
 
 @media (max-width: 760px), (max-height: 500px) and (pointer: coarse) {
   /* Полоска «домой» над нижней панелью: за неё тянут вверх. */
@@ -2205,7 +2210,7 @@ __m['windows'] = (() => {
 // системная «назад» и свайп вниз по заголовку возвращают на главный экран.
 const { APPS } = __m['data'];
 const { icon } = __m['icons'];
-const { pushLayer, closeLayer, dropLayer } = __m['nav'];
+const { pushLayer, closeLayer, dropLayer, resetLayers } = __m['nav'];
 const { esc, isMobile, prefersReducedMotion } = __m['util'];
 
 const registry = new Map(); // id → render(body, ctx) → необязательная функция очистки
@@ -2297,6 +2302,7 @@ function openApp(id, opts = {}) {
   let existing = wins.get(id);
   if (existing?.closing) { closeNow(id, true); existing = null; } // окно ещё закрывается: открываем заново
   if (existing) {
+    if (isMobile() && !existing.layer) attachLayer(id, existing); // вернули из фона: «назад» снова закрывает его
     focusWindow(id);
     existing.el.querySelector('.win__body')?.focus({ preventScroll: true });
     return existing.el;
@@ -2356,20 +2362,49 @@ function openApp(id, opts = {}) {
   return el;
 }
 
+/** Телефон: свёрнутые приложения (те, что смахнули вниз), последние свёрнутые первыми. */
+function runningApps() {
+  return [...wins.entries()]
+    .filter(([, w]) => w.el.classList.contains('is-min'))
+    .map(([id, w]) => ({ id, el: w.el, z: Number(w.el.style.zIndex) || 0 }))
+    .sort((a, b) => b.z - a.z);
+}
+
+/** Закрыть приложение насовсем (из переключателя приложений). */
+function closeApp(id) {
+  closeNow(id, true);
+}
+
+/**
+ * Телефон: свернуть. Приложения уходят в фон вместе с состоянием (шаги брони, введённый текст)
+ * и остаются в переключателе приложений. Системная «назад» на главном экране ничего не закрывает.
+ */
+function goHome() {
+  resetLayers();
+  wins.forEach((w) => {
+    w.layer = null;
+    w.el.style.transition = '';
+    w.el.style.transform = '';
+    w.el.style.opacity = '';
+    w.el.classList.add('is-min');
+    w.el.classList.remove('is-active');
+  });
+  notify();
+}
+
 function attachLayer(id, entry) {
   entry.layer = pushLayer({ close: () => closeNow(id), back: () => !!entry.ctx.onBack?.() });
 }
 
-/** Свайп вниз: приложение уезжает вниз и закрывается. */
+/** Свайп вниз: приложение уезжает вниз и сворачивается (остаётся в переключателе приложений). */
 function swipeAway(id) {
   const w = wins.get(id);
   if (!w || w.closing) return;
-  if (prefersReducedMotion()) { closeWindow(id); return; }
-  w.skipAnim = true; // окно уже уехало вниз, анимацию закрытия не повторяем
+  if (prefersReducedMotion()) { goHome(); return; }
   w.el.style.transition = 'transform 0.2s var(--ease), opacity 0.2s';
   w.el.style.transform = 'translateY(100%)';
   w.el.style.opacity = '0';
-  setTimeout(() => closeWindow(id), 190);
+  setTimeout(goHome, 190);
 }
 
 function closeWindow(id) {
@@ -2409,7 +2444,7 @@ function closeNow(id, instant = false) {
     notify();
     if (w.opener && document.contains(w.opener)) w.opener.focus?.({ preventScroll: true });
   };
-  if (instant || w.skipAnim || prefersReducedMotion()) { done(); return; }
+  if (instant || prefersReducedMotion()) { done(); return; }
   w.el.classList.add('is-closing');
   setTimeout(done, 170);
 }
@@ -2496,7 +2531,7 @@ function moveBy(el, dx, dy) {
   el.style.top = `${y}px`;
 }
 
-/** Телефон: потянуть вниз за верх содержимого (когда оно прокручено до начала) тоже закрывает приложение. */
+/** Телефон: потянуть вниз за верх содержимого (когда оно прокручено до начала) тоже сворачивает приложение. */
 function enablePullDown(el, id) {
   const body = el.querySelector('.win__body');
   let t = null;
@@ -2540,7 +2575,7 @@ function enableDrag(el, bar, id) {
   bar.addEventListener('pointermove', (e) => {
     if (!dragging) return;
     if (isMobile()) {
-      // Свайп вниз по заголовку закрывает приложение.
+      // Свайп вниз по заголовку сворачивает приложение.
       swipe = Math.max(0, e.clientY - sy);
       el.style.transform = `translateY(${swipe}px)`;
       el.style.opacity = String(1 - Math.min(0.6, swipe / 400));
@@ -2624,7 +2659,7 @@ function enableResize(el) {
   });
 }
 
-return { registerApp, onWindowsChange, state, focusWindow, openApp, closeWindow, closeAllWindows, cycleWindows, isOpen };
+return { registerApp, onWindowsChange, state, focusWindow, openApp, runningApps, closeApp, goHome, closeWindow, closeAllWindows, cycleWindows, isOpen };
 })();
 __m['ticket'] = (() => {
 // Билет-ваучер после брони: QR-заглушка, .ics для календаря, копирование и звонок.
@@ -4286,62 +4321,132 @@ function renderClassic(root) {
 return { renderClassic };
 })();
 __m['quick'] = (() => {
-// Быстрый доступ (телефон): свайп вверх от нижней панели открывает шторку с главными действиями,
-// как пункт управления на настоящем телефоне. Закрывает свайп вниз, нажатие на фон или системная «назад».
-const { BRANCHES, CLUB } = __m['data'];
-const { freeNow } = __m['availability'];
+// Переключатель приложений (телефон), как на настоящем телефоне: карточки открытых приложений листаются вбок,
+// смахиваются вверх или вниз (приложение закрывается), нажатие открывает приложение. Ниже быстрые действия.
+// Открывается свайпом вверх от нижней панели главного экрана. В нём живут приложения, свёрнутые свайпом вниз.
+const { BRANCHES, APPS } = __m['data'];
 const { gisRoute } = __m['community'];
+const { runningApps, closeApp, openApp } = __m['windows'];
 const { pushLayer, closeLayer } = __m['nav'];
-const { esc, telHref, isMobile, plural, prefersReducedMotion, $ } = __m['util'];
+const { esc, telHref, isMobile, prefersReducedMotion, $ } = __m['util'];
 const { icon } = __m['icons'];
 
 const root = () => $('#qa');
 let layer = null;
 let token = 0;
 
-function content() {
-  const n = freeNow();
+/** Миниатюра приложения: уменьшенная копия содержимого окна (без id, без интерактива, карта — заглушкой). */
+function thumb(el, title, W, H, scale) {
+  const clone = el.querySelector('.win__body').cloneNode(true);
+  clone.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+  clone.querySelectorAll('iframe').forEach((f) => { const d = document.createElement('div'); d.className = 'sw__map'; f.replaceWith(d); });
+  clone.setAttribute('inert', '');
+  clone.removeAttribute('tabindex');
+  const scaled = document.createElement('div');
+  scaled.className = 'sw__scaled';
+  scaled.style.cssText = `width:${W}px;height:${H}px;transform:scale(${scale})`;
+  scaled.innerHTML = `<div class="sw__bar">${esc(title)}</div>`;
+  scaled.appendChild(clone);
+  return scaled;
+}
+
+function cardSize() {
+  const banner = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--banner-h'), 10) || 0;
+  const W = window.innerWidth;
+  const H = window.innerHeight - banner;
+  let cw = Math.min(Math.round(W * 0.68), 300);
+  const maxH = Math.max(200, H - 300);
+  if ((H * cw) / W > maxH) cw = Math.round((maxH * W) / H);
+  const scale = cw / W;
+  return { W, H, cw, ch: Math.round(H * scale), scale };
+}
+
+function render() {
+  const el = root();
+  const { W, H, cw, ch, scale } = cardSize();
+  const apps = runningApps();
   const main = BRANCHES[0];
-  const btn = (attrs, ico, label, cls = '') => `<button type="button" class="qa__tile ${cls}" ${attrs}>${icon(ico, 26)}<span>${label}</span></button>`;
-  const link = (attrs, ico, label) => `<a class="qa__tile" ${attrs}>${icon(ico, 26)}<span>${label}</span></a>`;
-  return `
-    <div class="qa__top" id="qa-top">
-      <div class="qa__grab" aria-hidden="true"><i></i></div>
-      <header class="qa__head">
-        <b>Быстрый доступ</b>
-        <span class="mono muted">${n} ${plural(n, ['место свободно', 'места свободно', 'мест свободно'])} · открыто ${esc(CLUB.hours)}</span>
-      </header>
-    </div>
-    <div class="qa__tiles">
-      ${btn('data-open="book"', 'ticket', 'Бронь', 'qa__tile--main')}
-      ${link(`href="${telHref(main.phone)}"`, 'phone', 'Позвонить')}
-      ${link(`href="${gisRoute(main)}" target="_blank" rel="noopener noreferrer"`, 'pin', 'Маршрут')}
-      ${btn('data-open="tariffs"', 'coins', 'Тарифы')}
-      ${btn('data-open="promo"', 'gift', 'Акции')}
-      ${btn('data-open="branches"', 'grid', 'Филиалы')}
-      ${link(`href="${esc(CLUB.vk)}" target="_blank" rel="noopener noreferrer"`, 'chat', 'ВКонтакте')}
-      ${btn('data-mode="classic"', 'globe', 'Сайт')}
-    </div>
-    <ul class="qa__branches" aria-label="Филиалы">
-      ${BRANCHES.map((b) => `
-        <li>
-          <div><b>${esc(b.name)}</b><span class="muted small">${esc(b.district)}</span></div>
-          <a class="btn btn--ghost btn--sm" href="${telHref(b.phone)}" aria-label="Позвонить: ${esc(b.name)}">${icon('phone', 14)} Позвонить</a>
-          <a class="btn btn--ghost btn--sm" href="${gisRoute(b)}" target="_blank" rel="noopener noreferrer">Маршрут</a>
-        </li>`).join('')}
-    </ul>`;
+  el.style.setProperty('--cw', `${cw}px`);
+  el.innerHTML = `
+    <section class="sw" role="dialog" aria-label="Свёрнутые приложения">
+      ${apps.length
+        ? `<div class="sw__cards" id="sw-cards">${apps.map((a) => {
+          const meta = APPS.find((x) => x.id === a.id);
+          return `<article class="sw__card" data-id="${esc(a.id)}" tabindex="0" role="button" aria-label="Открыть: ${esc(meta.title)}. Смахните вверх или вниз, чтобы закрыть">
+            <header class="sw__head"><span class="sw__ico">${icon(meta.icon, 18)}</span><b>${esc(meta.title)}</b></header>
+            <div class="sw__view" style="width:${cw}px;height:${ch}px"></div>
+          </article>`;
+        }).join('')}</div>`
+        : '<div class="sw__empty"><p><b>Нет свёрнутых приложений</b><br>Смахните открытое приложение вниз, и оно появится здесь. Карточку можно смахнуть вверх или вниз, чтобы закрыть приложение.</p></div>'}
+      <div class="sw__foot">
+        <div class="qa__tiles">
+          <button type="button" class="qa__tile qa__tile--main" data-open="book">${icon('ticket', 24)}<span>Бронь</span></button>
+          <a class="qa__tile" href="${telHref(main.phone)}">${icon('phone', 24)}<span>Позвонить</span></a>
+          <a class="qa__tile" href="${gisRoute(main)}" target="_blank" rel="noopener noreferrer">${icon('pin', 24)}<span>Маршрут</span></a>
+          <button type="button" class="qa__tile" data-mode="classic">${icon('globe', 24)}<span>Сайт</span></button>
+        </div>
+        ${apps.length ? '<button type="button" class="sw__clear" id="sw-clear">Закрыть все</button>' : ''}
+      </div>
+    </section>`;
+  // Миниатюры вставляем после разметки: это копии настоящих окон.
+  apps.forEach((a) => {
+    const meta = APPS.find((x) => x.id === a.id);
+    $(`.sw__card[data-id="${a.id}"] .sw__view`, el)?.appendChild(thumb(a.el, meta.title, W, H, scale));
+  });
+  bindCards(el);
+}
+
+/** Смахивание карточек вверх или вниз закрывает приложение. */
+function bindCards(el) {
+  $('#sw-clear', el)?.addEventListener('click', () => {
+    runningApps().forEach((a) => closeApp(a.id));
+    render();
+  });
+  el.querySelectorAll('.sw__card').forEach((card) => {
+    card.addEventListener('pointerdown', (e) => {
+      if (e.button > 0) return;
+      const sx = e.clientX;
+      const sy = e.clientY;
+      let dy = 0;
+      let on = false;
+      const move = (ev) => {
+        dy = ev.clientY - sy;
+        if (!on) {
+          if (Math.abs(dy) < 8 || Math.abs(dy) < Math.abs(ev.clientX - sx)) return;
+          on = true;
+          card.dataset.dragged = '1';
+        }
+        card.style.transition = 'none';
+        card.style.transform = `translateY(${dy}px)`;
+        card.style.opacity = String(1 - Math.min(0.7, Math.abs(dy) / 320));
+      };
+      const up = () => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        setTimeout(() => { delete card.dataset.dragged; }, 0);
+        card.style.transition = '';
+        if (!on || Math.abs(dy) < 90) { card.style.transform = ''; card.style.opacity = ''; return; }
+        card.style.transform = `translateY(${dy < 0 ? -120 : 120}%)`;
+        card.style.opacity = '0';
+        const id = card.dataset.id;
+        setTimeout(() => { closeApp(id); render(); }, prefersReducedMotion() ? 0 : 200);
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
+    });
+  });
 }
 
 function show() {
   const el = root();
   if (!el || !el.hidden || !isMobile()) return;
   token += 1;
-  el.innerHTML = `<div class="qa__scrim"></div><section class="qa__sheet" role="dialog" aria-label="Быстрый доступ">${content()}</section>`;
+  render();
   el.hidden = false;
-  // Кадр на отрисовку «закрытого» вида, затем плавный подъём шторки.
   requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-open')));
   layer = pushLayer({ close: hide });
-  bindSheetDrag(el);
 }
 
 function hide() {
@@ -4351,10 +4456,10 @@ function hide() {
   const my = ++token;
   el.classList.remove('is-open');
   const done = () => { if (token === my) { el.hidden = true; el.innerHTML = ''; } };
-  if (prefersReducedMotion()) done(); else setTimeout(done, 280);
+  if (prefersReducedMotion()) done(); else setTimeout(done, 250);
 }
 
-/** Закрыть шторку из интерфейса (убирает и запись в истории). */
+/** Закрыть из интерфейса (убирает и запись в истории). */
 function close() {
   if (layer) closeLayer(layer); else hide();
 }
@@ -4370,44 +4475,28 @@ function closeQuickNow() {
   el.innerHTML = '';
 }
 
-/** Шторка закрывается свайпом вниз за верхнюю часть. */
-function bindSheetDrag(el) {
-  const sheet = $('.qa__sheet', el);
-  const top = $('#qa-top', el);
-  let sy = null;
-  let dy = 0;
-  top.addEventListener('pointerdown', (e) => {
-    sy = e.clientY; dy = 0;
-    try { top.setPointerCapture(e.pointerId); } catch { /* указатель мог исчезнуть */ }
-  });
-  top.addEventListener('pointermove', (e) => {
-    if (sy === null) return;
-    dy = Math.max(0, e.clientY - sy);
-    sheet.style.transition = 'none';
-    sheet.style.transform = `translateY(${dy}px)`;
-  });
-  const end = () => {
-    if (sy === null) return;
-    sy = null;
-    sheet.style.transition = '';
-    sheet.style.transform = '';
-    if (dy > 70) close();
-  };
-  top.addEventListener('pointerup', end);
-  top.addEventListener('pointercancel', end);
-}
-
 function initQuickAccess() {
   const el = root();
   if (!el) return;
 
-  // Закрытие: фон, любое действие внутри шторки, Esc.
   el.addEventListener('click', (e) => {
-    if (e.target.classList.contains('qa__scrim') || e.target.closest('[data-open], [data-mode], a')) close();
+    const card = e.target.closest('.sw__card');
+    if (card) {
+      if (card.dataset.dragged) return; // это был свайп, а не нажатие
+      const id = card.dataset.id;
+      close();
+      openApp(id);
+      return;
+    }
+    // Нажатие на пустое место или любое действие внутри закрывает переключатель.
+    if (!e.target.closest('.sw__head, .sw__clear') && (e.target.closest('[data-open], [data-mode], a') || ['sw', 'sw__cards', 'sw__foot', 'sw__empty'].some((c) => e.target.classList.contains(c)) || e.target === el)) close();
   });
-  el.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } });
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList?.contains('sw__card')) { e.preventDefault(); e.target.click(); }
+  });
 
-  // Открытие: свайп вверх от нижней панели или от полоски над ней; нажатие на полоску тоже открывает.
+  // Открытие: свайп вверх от нижней панели или от полоски над ней (нажатие на полоску тоже).
   const handle = $('#qa-handle');
   [$('#dock'), handle].forEach((zone) => {
     zone.addEventListener('pointerdown', (e) => {
