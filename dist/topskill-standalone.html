@@ -316,7 +316,7 @@ button { cursor: pointer; }
 .stats { list-style: none; display: flex; flex-wrap: wrap; gap: 12px; padding: 0; margin: 0 0 20px; }
 .stats li { flex: 1 1 130px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; gap: 2px; }
 .stat__n { font: 800 28px var(--font-head); color: var(--accent); letter-spacing: -0.03em; }
-.stats span { font-size: 12px; color: var(--muted); }
+.stats li > span { font-size: 12px; color: var(--muted); } /* только подпись, не число внутри .stat__n */
 
 /* ---------- тарифы ---------- */
 .tariffs { display: flex; flex-direction: column; gap: 18px; }
@@ -494,6 +494,35 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .faq__item[open] p { animation: faq-in 0.3s var(--ease); }
 @keyframes faq-in { from { opacity: 0; transform: translateY(-6px); } }
 .faq > .mono { margin-top: 8px; }
+
+/* ---------- Телефон: общие правки для приложений и обычного сайта ---------- */
+.pr-prizes > summary { display: none; }
+.map__show { display: none; }
+@media (max-width: 760px) {
+  /* Акции: большое число не вылезает, дни недели получают место. */
+  .pr-new, .pr-cash { padding: 18px; gap: 16px; }
+  .pr-big { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .pr-big b { font-size: clamp(56px, 20vw, 84px); }
+  .pr-big span { font-size: 16px; }
+  .pr-cash__week { flex-basis: 100%; }
+  .pr-week { gap: 4px; }
+  .pr-week li { min-height: 64px; border-radius: 12px; font-size: 12px; gap: 4px; }
+  .pr-week li.is-on b { font-size: 18px; }
+  /* Колесо: список призов сворачивается. */
+  .pr-prizes { width: 100%; border-top: 1px solid var(--line); padding-top: 4px; }
+  .pr-prizes > summary { display: flex; align-items: center; justify-content: space-between; min-height: 44px; cursor: pointer; font: 600 14px var(--font-body); color: var(--text); list-style: none; }
+  .pr-prizes > summary::-webkit-details-marker { display: none; }
+  .pr-prizes > summary::after { content: '+'; font: 400 22px var(--font-body); color: var(--accent); }
+  .pr-prizes[open] > summary::after { content: '−'; }
+  .pr-legend { grid-template-columns: 1fr 1fr; gap: 8px; }
+  /* Филиалы: сначала список, карта по кнопке. */
+  .branches { display: flex; flex-direction: column; }
+  .branches .map { order: 2; }
+  .branches .branch-list { order: 1; }
+  .branches > p { order: 3; }
+  .map__show { display: inline-flex; width: 100%; border: 0; border-radius: 0; min-height: 52px; }
+  .map__live iframe { min-height: 300px; }
+}
 
 </style>
   <style>
@@ -3388,7 +3417,10 @@ const promo = {
           <p class="muted small">Одно вращение в день. В демо колесо крутится бесплатно.</p>
           <button type="button" class="btn btn--accent" id="wheel-go">Крутить</button>
           <p class="pr-result" id="wheel-res" aria-live="polite"></p>
-          <ol class="pr-legend">${WHEEL_PRIZES.map((p, i) => `<li><i style="--c:${WHEEL_COLORS[i % WHEEL_COLORS.length]}">${i + 1}</i>${esc(p)}</li>`).join('')}</ol>
+          <details class="pr-prizes" open>
+            <summary>Все призы колеса (${WHEEL_PRIZES.length})</summary>
+            <ol class="pr-legend">${WHEEL_PRIZES.map((p, i) => `<li><i style="--c:${WHEEL_COLORS[i % WHEEL_COLORS.length]}">${i + 1}</i>${esc(p)}</li>`).join('')}</ol>
+          </details>
         </div>
       </article>
     </div>`;
@@ -3430,6 +3462,8 @@ const promo = {
         toast(`<b>Колесо удачи</b><br>${esc(WHEEL_PRIZES[idx])}`);
       }, prefersReducedMotion() ? 0 : 3500);
     });
+    // На телефоне список призов свёрнут: колесо и кнопка важнее.
+    if (window.matchMedia('(max-width: 760px)').matches) $('.pr-prizes', root)?.removeAttribute('open');
     $('#pr-copy', root).addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(PROMO.code); toast(`<b>Скопировано</b><br>${esc(PROMO.code)}`); } catch { toast('Не удалось скопировать', 'hot'); }
     });
@@ -3450,6 +3484,7 @@ const branches = {
     <div class="pad branches">
       <figure class="map">
         <div class="map__live" id="map-live">
+          <button type="button" class="btn btn--ghost map__show" id="map-show">Показать карту</button>
           <iframe id="map-frame" title="Карта филиалов в 2ГИС" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
         </div>
         <figcaption class="map__bar">
@@ -3480,9 +3515,19 @@ const branches = {
   mount(root) {
     const frame = $('#map-frame', root);
     const cap = $('#map-cap', root);
-    const show = (b) => {
+    let current = BRANCHES[0];
+    const phone = window.matchMedia('(max-width: 760px)').matches;
+    // На телефоне карта грузится по нажатию: она тяжёлая, а список филиалов и маршрут уже есть ниже.
+    const showBtn = $('#map-show', root);
+    const setMapVisible = (on) => { frame.hidden = !on; showBtn.hidden = on; if (on) load2gis(current); };
+    const load2gis = (b) => {
       const url = gisWidget(b);
       if (frame.dataset.src !== url) { frame.dataset.src = url; frame.src = url; }
+    };
+    showBtn.addEventListener('click', () => setMapVisible(true));
+    const show = (b) => {
+      current = b;
+      if (!frame.hidden) load2gis(b);
       cap.textContent = b.address;
       $$('.branch', root).forEach((p) => p.classList.toggle('is-on', p.dataset.b === b.id));
     };
@@ -3491,6 +3536,7 @@ const branches = {
       p.addEventListener('mouseenter', pick);
       p.addEventListener('focusin', pick);
     });
+    setMapVisible(!phone);
     show(BRANCHES[0]);
   },
 };

@@ -77,7 +77,10 @@ export const promo = {
           <p class="muted small">Одно вращение в день. В демо колесо крутится бесплатно.</p>
           <button type="button" class="btn btn--accent" id="wheel-go">Крутить</button>
           <p class="pr-result" id="wheel-res" aria-live="polite"></p>
-          <ol class="pr-legend">${WHEEL_PRIZES.map((p, i) => `<li><i style="--c:${WHEEL_COLORS[i % WHEEL_COLORS.length]}">${i + 1}</i>${esc(p)}</li>`).join('')}</ol>
+          <details class="pr-prizes" open>
+            <summary>Все призы колеса (${WHEEL_PRIZES.length})</summary>
+            <ol class="pr-legend">${WHEEL_PRIZES.map((p, i) => `<li><i style="--c:${WHEEL_COLORS[i % WHEEL_COLORS.length]}">${i + 1}</i>${esc(p)}</li>`).join('')}</ol>
+          </details>
         </div>
       </article>
     </div>`;
@@ -119,6 +122,8 @@ export const promo = {
         toast(`<b>Колесо удачи</b><br>${esc(WHEEL_PRIZES[idx])}`);
       }, prefersReducedMotion() ? 0 : 3500);
     });
+    // На телефоне список призов свёрнут: колесо и кнопка важнее.
+    if (window.matchMedia('(max-width: 760px)').matches) $('.pr-prizes', root)?.removeAttribute('open');
     $('#pr-copy', root).addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(PROMO.code); toast(`<b>Скопировано</b><br>${esc(PROMO.code)}`); } catch { toast('Не удалось скопировать', 'hot'); }
     });
@@ -139,6 +144,7 @@ export const branches = {
     <div class="pad branches">
       <figure class="map">
         <div class="map__live" id="map-live">
+          <button type="button" class="btn btn--ghost map__show" id="map-show">Показать карту</button>
           <iframe id="map-frame" title="Карта филиалов в 2ГИС" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
         </div>
         <figcaption class="map__bar">
@@ -169,9 +175,19 @@ export const branches = {
   mount(root) {
     const frame = $('#map-frame', root);
     const cap = $('#map-cap', root);
-    const show = (b) => {
+    let current = BRANCHES[0];
+    const phone = window.matchMedia('(max-width: 760px)').matches;
+    // На телефоне карта грузится по нажатию: она тяжёлая, а список филиалов и маршрут уже есть ниже.
+    const showBtn = $('#map-show', root);
+    const setMapVisible = (on) => { frame.hidden = !on; showBtn.hidden = on; if (on) load2gis(current); };
+    const load2gis = (b) => {
       const url = gisWidget(b);
       if (frame.dataset.src !== url) { frame.dataset.src = url; frame.src = url; }
+    };
+    showBtn.addEventListener('click', () => setMapVisible(true));
+    const show = (b) => {
+      current = b;
+      if (!frame.hidden) load2gis(b);
       cap.textContent = b.address;
       $$('.branch', root).forEach((p) => p.classList.toggle('is-on', p.dataset.b === b.id));
     };
@@ -180,6 +196,7 @@ export const branches = {
       p.addEventListener('mouseenter', pick);
       p.addEventListener('focusin', pick);
     });
+    setMapVisible(!phone);
     show(BRANCHES[0]);
   },
 };
